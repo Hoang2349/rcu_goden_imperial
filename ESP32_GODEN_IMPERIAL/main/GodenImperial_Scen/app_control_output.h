@@ -26,22 +26,22 @@ enum RelayIndex
 
 enum Ledindex
 {
-    LED_DND_OUT_DOOR = 0x01,
-    LED_MUR_OUT_DOOR = 0x02,
-    LED_BELL = 0x03,
-    LED_DND = 0x04,
+    LED_BELL = 0x01,
+    LED_DND_OUT_DOOR = 0x02,
+    LED_MUR_OUT_DOOR = 0x03,
+    LED_DND = 0x06,
     LED_MUR = 0x05,
-    LED_MASTER_M1 = 0x06,
-    LED_MASTER_M2 = 0x10,
-    LED_MASTER_M3 = 0x16,
+    LED_MASTER_M1 = 0x04,
     LED_TOILET = 0x0A,
     LED_BATHROOM = 0x0B,
+    LED_READING_S2 = 0x11,
+    LED_DECORATION_S2 = 0x13,
+    LED_MASTER_M2 = 0x10,
+    LED_MASTER_M3 = 0x16,
     LED_MINIBAR = 0x0D,
     LED_SPORT_LIGHT = 0x12,
-    LED_DECORATION_S2 = 0x13,
     LED_DECORATION_S3 = 0x14,
     LED_COVER_LIGHT = 0x17,
-    LED_READING_S2 = 0x11,
     LED_READING_S3 = 0x18,
 };
 
