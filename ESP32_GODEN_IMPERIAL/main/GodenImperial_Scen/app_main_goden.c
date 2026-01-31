@@ -30,15 +30,15 @@ void init_status_room()
 {
     status_room_cur.master_m1_status = false;
     status_room_cur.toilet_status = false;
-    status_room_cur.bathroom_status = false;
+    status_room_cur.wc_light_status = false;
     status_room_cur.minibar_status = false;
     status_room_cur.master_m2_status = false;
     status_room_cur.reading_s2_status = false;
-    status_room_cur.sport_light_status = false;
-    status_room_cur.decoration_s2_status = false;
-    status_room_cur.decoration_s3_status = false;
+    status_room_cur.ceiling_light_s2_status = false;
+    status_room_cur.night_light_s2_status = false;
+    status_room_cur.night_light_s3_status = false;
     status_room_cur.master_m3_status = false;
-    status_room_cur.cover_light_status = false;
+    status_room_cur.ceiling_light_s3_status = false;
     status_room_cur.reading_s3_status = false;
 }
 
@@ -103,7 +103,6 @@ void rule_room_hotel()
 
                 if (pms_room_status.flag_checkin_first)
                 {
-                    pms_room_status.status_human = OCCUPIED;
                     handle_scene_welcome();
                     pms_room_status.flag_checkin_first = false;
                     temp = true;
@@ -112,7 +111,7 @@ void rule_room_hotel()
                     publish_data_mqtt(json_string);
 
                     char *json_string1 =
-                        create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
+                        create_json_dynamic("ROOM_STATUS", "UNOCC", TYPE_STRING);
                     publish_data_mqtt(json_string1);
                     free(json_string1);
                     free(json_string);

@@ -73,88 +73,53 @@ void scene_goden_deinit(void)
     // This function should clean up any resources or states used by the scene.
 }
 
-/// @brief Turn on the master M1 light
+// Scene control functions
+
 void scene_master_m1_on()
 {
     char data_send[MAX_DATA_SIZE] = {0};
+    generate_relay_command(RELAY_C1, true, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C1, true);
 
-    for (int relay = RELAY_C1; relay <= RELAY_C12; relay++)
-    {
-        generate_relay_command(relay, true, data_send);
-        modbusWrite(data_send, MAX_DATA_SIZE);
-
-        push_state_inout_mqtt(relay, true);
-    }
 }
 void scene_master_m1_off()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-
-    for (int relay = RELAY_C1; relay <= RELAY_C12; relay++)
-    {
-        generate_relay_command(relay, false, data_send);
-        modbusWrite(data_send, MAX_DATA_SIZE);
-        push_state_inout_mqtt(relay, false);
-    }
+    generate_relay_command(RELAY_C1, false, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C1, false);
 }
 
 void scene_master_m2_on()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-
-    uint8_t relays[] = {RELAY_C1, RELAY_C2, RELAY_C3,  RELAY_C4,  RELAY_C7,
-                        RELAY_C8, RELAY_C9, RELAY_C10, RELAY_C11, RELAY_C12};
-
-    for (int i = 0; i < sizeof(relays) / sizeof(relays[0]); i++)
-    {
-        generate_relay_command(relays[i], true, data_send);
-        modbusWrite(data_send, MAX_DATA_SIZE);
-        push_state_inout_mqtt(relays[i], true);
-    }
+    generate_relay_command(RELAY_C1, true, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C1, true);
 }
 
 void scene_master_m2_off()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-
-    uint8_t relays[] = {RELAY_C1, RELAY_C2, RELAY_C3,  RELAY_C4,  RELAY_C7,
-                        RELAY_C8, RELAY_C9, RELAY_C10, RELAY_C11, RELAY_C12};
-
-    for (int i = 0; i < sizeof(relays) / sizeof(relays[0]); i++)
-    {
-        generate_relay_command(relays[i], false, data_send);
-        modbusWrite(data_send, MAX_DATA_SIZE);
-        push_state_inout_mqtt(relays[i], false);
-    }
+    generate_relay_command(RELAY_C1, false, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C1, false);
 }
 
 void scene_master_m3_on()
 {
-    char data_send[MAX_DATA_SIZE] = {0};
-
-    uint8_t relays[] = {RELAY_C1, RELAY_C2, RELAY_C3,  RELAY_C4,  RELAY_C7,
-                        RELAY_C8, RELAY_C9, RELAY_C10, RELAY_C11, RELAY_C12};
-
-    for (int i = 0; i < sizeof(relays) / sizeof(relays[0]); i++)
-    {
-        generate_relay_command(relays[i], true, data_send);
-        modbusWrite(data_send, MAX_DATA_SIZE);
-        push_state_inout_mqtt(relays[i], true);
-    }
+   char data_send[MAX_DATA_SIZE] = {0};
+    generate_relay_command(RELAY_C1, true, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C1, true);
 }
 void scene_master_m3_off()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-
-    uint8_t relays[] = {RELAY_C1, RELAY_C2, RELAY_C3,  RELAY_C4,  RELAY_C7,
-                        RELAY_C8, RELAY_C9, RELAY_C10, RELAY_C11, RELAY_C12};
-
-    for (int i = 0; i < sizeof(relays) / sizeof(relays[0]); i++)
-    {
-        generate_relay_command(relays[i], false, data_send);
-        modbusWrite(data_send, MAX_DATA_SIZE);
-        push_state_inout_mqtt(relays[i], false);
-    }
+    generate_relay_command(RELAY_C1, false, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C1, false);
 }
 
 void scene_toilet_on()
@@ -163,9 +128,6 @@ void scene_toilet_on()
     generate_relay_command(RELAY_C2, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C2, true);
-    generate_relay_command(RELAY_C6, true, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C6, true);
 }
 
 void scene_toilet_off()
@@ -174,91 +136,70 @@ void scene_toilet_off()
     generate_relay_command(RELAY_C2, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C2, false);
-    generate_relay_command(RELAY_C6, false, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C6, false);
 }
 
-void scene_bathroom_on()
+void scene_wc_light_on()
 {
     char data_send[MAX_DATA_SIZE] = {0};
     generate_relay_command(RELAY_C3, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C3, true);
-    generate_relay_command(RELAY_C10, true, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C10, true);
 }
 
-void scene_bathroom_off()
+void scene_wc_light_off()
 {
     char data_send[MAX_DATA_SIZE] = {0};
     generate_relay_command(RELAY_C3, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C3, false);
-    generate_relay_command(RELAY_C10, false, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C10, false);
 }
-void scene_reading_on()
+void scene_reading_s2_on()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_C8, true, data_send);
+    generate_relay_command(RELAY_C6, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C8, true);
+    push_state_inout_mqtt(RELAY_C6, true);
 }
-void scene_reading_off()
+void scene_reading_s2_off()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_C8, false, data_send);
+    generate_relay_command(RELAY_C6, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C8, false);
+    push_state_inout_mqtt(RELAY_C6, false);
 }
-void scene_sport_light_on()
+void scene_ceiling_s2_on()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_C4, true, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C4, true);
-    generate_relay_command(RELAY_C8, true, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C8, true);
-}
-
-void scene_sport_light_off()
-{
-    char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_C4, false, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C4, false);
-    generate_relay_command(RELAY_C8, false, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C8, false);
-}
-
-void scene_decorration_on()
-{
-    char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_C5, true, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C5, true);
     generate_relay_command(RELAY_C7, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C7, true);
 }
 
-void scene_decorration_off()
+void scene_ceiling_s2_off()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_C5, false, data_send);
-    modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C5, false);
     generate_relay_command(RELAY_C7, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C7, false);
 }
 
-void scene_cover_light_on()
+void scene_night_light_on()
+{
+    char data_send[MAX_DATA_SIZE] = {0};
+    generate_relay_command(RELAY_C5, true, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C5, true);
+}
+
+void scene_night_light_off()
+{
+    char data_send[MAX_DATA_SIZE] = {0};
+    generate_relay_command(RELAY_C5, false, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C5, false);
+}
+
+void scene_ceiling_s3_on()
 {
     char data_send[MAX_DATA_SIZE] = {0};
     generate_relay_command(RELAY_C4, true, data_send);
@@ -266,27 +207,43 @@ void scene_cover_light_on()
     push_state_inout_mqtt(RELAY_C4, true);
 }
 
-void scene_cover_light_off()
+void scene_ceiling_s3_off()
 {
     char data_send[MAX_DATA_SIZE] = {0};
     generate_relay_command(RELAY_C4, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C4, false);
 }
+
+void scene_reading_s3_on()
+{
+    char data_send[MAX_DATA_SIZE] = {0};
+    generate_relay_command(RELAY_C8, true, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C8, true);
+}
+void scene_reading_s3_off()
+{
+    char data_send[MAX_DATA_SIZE] = {0};
+    generate_relay_command(RELAY_C8, false, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C8, false);
+}
+
 void scene_minibar_on()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_C11, true, data_send);
+    generate_relay_command(RELAY_C9, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C11, true);
+    push_state_inout_mqtt(RELAY_C9, true);
 }
 
 void scene_minibar_off()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_C11, false, data_send);
+    generate_relay_command(RELAY_C9, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
-    push_state_inout_mqtt(RELAY_C11, false);
+    push_state_inout_mqtt(RELAY_C9, false);
 }
 
 void scene_bell_on()
@@ -295,6 +252,9 @@ void scene_bell_on()
     generate_relay_command(RELAY_C1, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C1, true);  // Added push state for bell on
+    generate_relay_command(RELAY_C10, true, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C10, true);
 }
 
 void scene_bell_off()
@@ -303,6 +263,9 @@ void scene_bell_off()
     generate_relay_command(RELAY_C1, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C1, false);  // Added push state for bell off
+    generate_relay_command(RELAY_C10, false, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C10, false);
 }
 
 void scene_itc_on()
@@ -336,126 +299,160 @@ void scene_idu_off()
     push_state_inout_mqtt(RELAY_IDU, false);  // Added push state for IDU off
 }
 
+
+// Event Handlers
 void handle_event_master_m1(bool new_status)
 {
     // bool new_status = !status_room_cur.master_m1_status;
     set_scene_status(new_status, scene_master_m1_on, scene_master_m1_off);
     status_room_new.master_m1_status = new_status;
-    status_room_new.toilet_status = new_status;
-    status_room_new.bathroom_status = new_status;
-    status_room_new.minibar_status = new_status;
     status_room_new.master_m2_status = new_status;
-    status_room_new.reading_s2_status = new_status;
-    status_room_new.sport_light_status = new_status;
-    status_room_new.decoration_s2_status = new_status;
-    status_room_new.decoration_s3_status = new_status;
     status_room_new.master_m3_status = new_status;
-    status_room_new.cover_light_status = new_status;
-    status_room_new.reading_s3_status = new_status;
     flag_syn_status_room = true;
 }
 
 void handle_event_master_m2(bool new_status)
 {
     set_scene_status(new_status, scene_master_m2_on, scene_master_m2_off);
-
+    status_room_new.master_m1_status = new_status;
     status_room_new.master_m2_status = new_status;
-    status_room_new.bathroom_status = new_status;
-    status_room_new.minibar_status = new_status;
-    status_room_new.reading_s2_status = new_status;
-    status_room_new.sport_light_status = new_status;
-    status_room_new.decoration_s3_status = new_status;
     status_room_new.master_m3_status = new_status;
-    status_room_new.cover_light_status = new_status;
-    status_room_new.reading_s3_status = new_status;
     flag_syn_status_room = true;
 }
 
 void handle_event_toilet(bool new_status)
 {
     set_scene_status(new_status, scene_toilet_on, scene_toilet_off);
-    flag_syn_status_room = true;
     status_room_new.toilet_status = new_status;
+    flag_syn_status_room = true;
 }
 
-void handle_event_bathroom(bool new_status)
+void handle_event_wc_light(bool new_status)
 {
-    set_scene_status(new_status, scene_bathroom_on, scene_bathroom_off);
+    set_scene_status(new_status, scene_wc_light_on, scene_wc_light_off);
+    status_room_new.wc_light_status = new_status;
     flag_syn_status_room = true;
-    status_room_new.bathroom_status = new_status;
 }
 
 void handle_event_minibar(bool new_status)
 {
     set_scene_status(new_status, scene_minibar_on, scene_minibar_off);
-    flag_syn_status_room = true;
     status_room_new.minibar_status = new_status;
+    flag_syn_status_room = true;
 }
 
 void handle_event_reading_s2(bool new_status)
 {
-    set_scene_status(new_status, scene_reading_on, scene_reading_off);
-    flag_syn_status_room = true;
+    set_scene_status(new_status, scene_reading_s2_on, scene_reading_s2_off);
     status_room_new.reading_s2_status = new_status;
-    status_room_new.reading_s3_status = new_status;
+    flag_syn_status_room = true;
 }
 
-void handle_event_sport_light(bool new_status)
+void handle_event_ceiling_s2(bool new_status)
 {
-    set_scene_status(new_status, scene_sport_light_on, scene_sport_light_off);
+    set_scene_status(new_status, scene_ceiling_s2_on, scene_ceiling_s2_off);
+    status_room_new.ceiling_light_s2_status = new_status;
     flag_syn_status_room = true;
-    status_room_new.sport_light_status = new_status;
 }
 
-void handle_event_decoration_s2(bool new_status)
+void handle_event_night_s2(bool new_status)
 {
-    set_scene_status(new_status, scene_decorration_on, scene_decorration_off);
+    set_scene_status(new_status, scene_night_light_on, scene_night_light_off);
+    status_room_new.night_light_s2_status = new_status;
+    status_room_new.night_light_s3_status = new_status;
     flag_syn_status_room = true;
-    status_room_new.decoration_s2_status = new_status;
-    status_room_new.decoration_s3_status = new_status;
 }
 
-void handle_event_decoration_s3(bool new_status)
+void handle_event_night_s3(bool new_status)
 {
-    set_scene_status(new_status, scene_decorration_on, scene_decorration_off);
+    set_scene_status(new_status, scene_night_light_on, scene_night_light_off);
+    status_room_new.night_light_s3_status = new_status;
+    status_room_new.night_light_s2_status = new_status;
     flag_syn_status_room = true;
-    status_room_new.decoration_s3_status = new_status;
-    status_room_new.decoration_s2_status = new_status;
 }
 
 void handle_event_master_m3(bool new_status)
 {
     set_scene_status(new_status, scene_master_m3_on, scene_master_m3_off);
-    flag_syn_status_room = true;
     status_room_new.master_m3_status = new_status;
     status_room_new.master_m2_status = new_status;
-    status_room_new.bathroom_status = new_status;
-    status_room_new.minibar_status = new_status;
-    status_room_new.reading_s2_status = new_status;
-    status_room_new.sport_light_status = new_status;
-    status_room_new.decoration_s3_status = new_status;
-    status_room_new.cover_light_status = new_status;
-    status_room_new.reading_s3_status = new_status;
+    status_room_new.master_m1_status = new_status;
+    flag_syn_status_room = true;
 }
 
-void handle_event_cover_light(bool new_status)
+void handle_event_ceiling_s3(bool new_status)
 {
-    set_scene_status(new_status, scene_cover_light_on, scene_cover_light_off);
+    set_scene_status(new_status, scene_ceiling_s3_on, scene_ceiling_s3_off);
     flag_syn_status_room = true;
-    status_room_new.cover_light_status = new_status;
+    status_room_new.ceiling_light_s3_status = new_status;
 }
 
 void handle_event_reading_s3(bool new_status)
 {
-    set_scene_status(new_status, scene_reading_on, scene_reading_off);
-    flag_syn_status_room = true;
+    set_scene_status(new_status, scene_reading_s3_on, scene_reading_s3_off);
     status_room_new.reading_s3_status = new_status;
-    status_room_new.reading_s2_status = new_status;
+    flag_syn_status_room = true;
+}
+
+void scene_on_all()
+{
+    //on all
+    bool on_status = true;
+    scene_master_m1_on();
+    scene_toilet_on();
+    scene_wc_light_on();
+    scene_minibar_on();
+    scene_reading_s2_on();
+    scene_ceiling_s2_on();
+    scene_night_light_on();
+    scene_ceiling_s3_on();
+    scene_reading_s3_on();
+    status_room_new.master_m1_status = on_status;
+    status_room_new.master_m2_status = on_status;
+    status_room_new.master_m3_status = on_status;
+    status_room_new.toilet_status = on_status;
+    status_room_new.wc_light_status = on_status;
+    status_room_new.minibar_status = on_status;
+    status_room_new.reading_s2_status = on_status;
+    status_room_new.ceiling_light_s2_status = on_status;
+    status_room_new.night_light_s2_status = on_status;
+    status_room_new.night_light_s3_status = on_status;
+    status_room_new.ceiling_light_s3_status = on_status;
+    status_room_new.reading_s3_status = on_status;
+    flag_syn_status_room = true;
+}
+
+void scene_off_all()
+{
+    //off all
+    bool off_status = false;
+    scene_master_m1_off();
+    scene_toilet_off();
+    scene_wc_light_off();
+    scene_minibar_off();
+    scene_reading_s2_off();
+    scene_ceiling_s2_off();
+    scene_night_light_off();
+    scene_ceiling_s3_off();
+    scene_reading_s3_off();
+    status_room_new.master_m1_status = off_status;
+    status_room_new.master_m2_status = off_status;
+    status_room_new.master_m3_status = off_status;
+    status_room_new.toilet_status = off_status;
+    status_room_new.wc_light_status = off_status;
+    status_room_new.minibar_status = off_status;
+    status_room_new.reading_s2_status = off_status;
+    status_room_new.ceiling_light_s2_status = off_status;
+    status_room_new.night_light_s2_status = off_status;
+    status_room_new.night_light_s3_status = off_status;
+    status_room_new.ceiling_light_s3_status = off_status;
+    status_room_new.reading_s3_status = off_status;
+    flag_syn_status_room = true;
 }
 
 void handle_scene_unrentd()
 {
-    handle_event_master_m1(INACTIVE);
+    scene_off_all();
     scene_itc_off();
     scene_idu_off();
     char *json_string =
@@ -477,7 +474,7 @@ void handle_scene_unrentd()
 
 void handle_scene_staff_mode()
 {
-    handle_event_master_m1(ACTIVE);
+    scene_on_all();
     scene_itc_off();
     scene_idu_off();
     char *json_string =
@@ -489,7 +486,7 @@ void handle_scene_staff_mode()
 
 void handle_scene_welcome()
 {
-    handle_event_master_m1(ACTIVE);
+    scene_on_all();
     scene_itc_on();
     scene_idu_on();
     char *json_string =
@@ -501,7 +498,7 @@ void handle_scene_welcome()
 
 void handle_scene_standby()
 {
-    handle_event_master_m1(INACTIVE);
+    scene_off_all();
     scene_itc_off();
     scene_idu_off();
     char *json_string =
@@ -542,22 +539,22 @@ void handle_scene_setback()
     status_room_new.master_m1_status =
         state_setback.status_room.master_m1_status;
     status_room_new.toilet_status = state_setback.status_room.toilet_status;
-    status_room_new.bathroom_status = state_setback.status_room.bathroom_status;
+    status_room_new.wc_light_status = state_setback.status_room.wc_light_status;
     status_room_new.minibar_status = state_setback.status_room.minibar_status;
     status_room_new.master_m2_status =
         state_setback.status_room.master_m2_status;
     status_room_new.reading_s2_status =
         state_setback.status_room.reading_s2_status;
-    status_room_new.sport_light_status =
-        state_setback.status_room.sport_light_status;
-    status_room_new.decoration_s2_status =
-        state_setback.status_room.decoration_s2_status;
-    status_room_new.decoration_s3_status =
-        state_setback.status_room.decoration_s3_status;
+    status_room_new.ceiling_light_s2_status =
+        state_setback.status_room.ceiling_light_s2_status;
+    status_room_new.night_light_s2_status =
+        state_setback.status_room.night_light_s2_status;
+    status_room_new.night_light_s3_status =
+        state_setback.status_room.night_light_s3_status;
     status_room_new.master_m3_status =
         state_setback.status_room.master_m3_status;
-    status_room_new.cover_light_status =
-        state_setback.status_room.cover_light_status;
+    status_room_new.ceiling_light_s3_status =
+        state_setback.status_room.ceiling_light_s3_status;
     status_room_new.reading_s3_status =
         state_setback.status_room.reading_s3_status;
     flag_syn_status_room = true;
@@ -577,17 +574,17 @@ void handle_led_status()
     HANDLE_LED_STATUS(master_m1_status, hanlde_led_switch, LED_MASTER_M1);
     HANDLE_LED_STATUS(master_m2_status, hanlde_led_switch, LED_MASTER_M2);
     HANDLE_LED_STATUS(toilet_status, hanlde_led_switch, LED_TOILET);
-    HANDLE_LED_STATUS(bathroom_status, hanlde_led_switch, LED_BATHROOM);
+    HANDLE_LED_STATUS(wc_light_status, hanlde_led_switch, LED_BATHROOM);
     HANDLE_LED_STATUS(minibar_status, hanlde_led_switch, LED_MINIBAR);
     HANDLE_LED_STATUS(master_m2_status, hanlde_led_switch, LED_MASTER_M2);
     HANDLE_LED_STATUS(reading_s2_status, hanlde_led_switch, LED_READING_S2);
-    HANDLE_LED_STATUS(sport_light_status, hanlde_led_switch, LED_SPORT_LIGHT);
-    HANDLE_LED_STATUS(decoration_s2_status, hanlde_led_switch,
+    HANDLE_LED_STATUS(ceiling_light_s2_status, hanlde_led_switch, LED_SPORT_LIGHT);
+    HANDLE_LED_STATUS(night_light_s2_status, hanlde_led_switch,
                       LED_DECORATION_S2);
-    HANDLE_LED_STATUS(decoration_s3_status, hanlde_led_switch,
+    HANDLE_LED_STATUS(night_light_s3_status, hanlde_led_switch,
                       LED_DECORATION_S3);
     HANDLE_LED_STATUS(master_m3_status, hanlde_led_switch, LED_MASTER_M3);
-    HANDLE_LED_STATUS(cover_light_status, hanlde_led_switch, LED_COVER_LIGHT);
+    HANDLE_LED_STATUS(ceiling_light_s3_status, hanlde_led_switch, LED_COVER_LIGHT);
     HANDLE_LED_STATUS(reading_s3_status, hanlde_led_switch, LED_READING_S3);
 }
 
@@ -633,24 +630,24 @@ void update_setback_status_room()
         state_setback.status_room.master_m1_status =
             status_room_cur.master_m1_status;
         state_setback.status_room.toilet_status = status_room_cur.toilet_status;
-        state_setback.status_room.bathroom_status =
-            status_room_cur.bathroom_status;
+        state_setback.status_room.wc_light_status =
+            status_room_cur.wc_light_status;
         state_setback.status_room.minibar_status =
             status_room_cur.minibar_status;
         state_setback.status_room.master_m2_status =
             status_room_cur.master_m2_status;
         state_setback.status_room.reading_s2_status =
             status_room_cur.reading_s2_status;
-        state_setback.status_room.sport_light_status =
-            status_room_cur.sport_light_status;
-        state_setback.status_room.decoration_s2_status =
-            status_room_cur.decoration_s2_status;
-        state_setback.status_room.decoration_s3_status =
-            status_room_cur.decoration_s3_status;
+        state_setback.status_room.ceiling_light_s2_status =
+            status_room_cur.ceiling_light_s2_status;
+        state_setback.status_room.night_light_s2_status =
+            status_room_cur.night_light_s2_status;
+        state_setback.status_room.night_light_s3_status =
+            status_room_cur.night_light_s3_status;
         state_setback.status_room.master_m3_status =
             status_room_cur.master_m3_status;
-        state_setback.status_room.cover_light_status =
-            status_room_cur.cover_light_status;
+        state_setback.status_room.ceiling_light_s3_status =
+            status_room_cur.ceiling_light_s3_status;
         state_setback.status_room.reading_s3_status =
             status_room_cur.reading_s3_status;
     }

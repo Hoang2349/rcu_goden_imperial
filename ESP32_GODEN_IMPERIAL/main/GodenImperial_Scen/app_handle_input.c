@@ -197,13 +197,13 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
             handle_event_toilet(new_status);
             break;
 
-        case EVENT_BATHROOM:
-            new_status = !status_room_cur.bathroom_status;
-            strcpy(state_inout.key, "S1A_BATH");
+        case EVENT_WC_LIGHTING:
+            new_status = !status_room_cur.wc_light_status;
+            strcpy(state_inout.key, "S1A_WC");
             strcpy(state_inout.value, new_status ? "true" : "false");
             push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
-            ESP_LOGI(__FUNCTION__, "Bathroom event triggered");
-            handle_event_bathroom(new_status);
+            handle_event_wc_light(new_status);
+            ESP_LOGI(__FUNCTION__, "WC Lighting event triggered");
             break;
 
         case EVENT_MINIBAR:
@@ -233,13 +233,49 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
             ESP_LOGI(__FUNCTION__, "Reading S2 event triggered");
             break;
 
-        case EVENT_SPORT_LIGHT:
-            new_status = !status_room_cur.sport_light_status;
-            handle_event_sport_light(new_status);
-            strcpy(state_inout.key, "S2_SPOT");
+        case EVENT_CEILING_S2:
+            new_status = !status_room_cur.ceiling_light_s2_status;
+            handle_event_ceiling_s2(new_status);
+            strcpy(state_inout.key, "S2_CEILING");
             strcpy(state_inout.value, new_status ? "true" : "false");
             push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
-            ESP_LOGI(__FUNCTION__, "Sport light event triggered");
+            ESP_LOGI(__FUNCTION__, "Ceiling S2 event triggered");
+            break;
+            
+        case EVENT_NIGHT_LIGHT_S2:
+            new_status = !status_room_cur.night_light_s2_status;
+            handle_event_night_s2(new_status);
+            strcpy(state_inout.key, "S2_NIGHT");
+            strcpy(state_inout.value, new_status ? "true" : "false");
+            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+            ESP_LOGI(__FUNCTION__, "Night Light S2 event triggered");
+            break;
+
+        case EVENT_NIGHT_LIGHT_S3:
+            new_status = !status_room_cur.night_light_s3_status;
+            handle_event_night_s3(new_status);
+            strcpy(state_inout.key, "S3_NIGHT");
+            strcpy(state_inout.value, new_status ? "true" : "false");
+            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+            ESP_LOGI(__FUNCTION__, "Night Light S3 event triggered");
+            break;
+            
+        case EVENT_CEILING_S3:
+            ESP_LOGI(__FUNCTION__, "Ceiling S3 event triggered");
+            new_status = !status_room_cur.ceiling_light_s3_status;
+            handle_event_ceiling_s3(new_status);
+            strcpy(state_inout.key, "S3_CEILING");
+            strcpy(state_inout.value, new_status ? "true" : "false");
+            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+            break;
+            
+        case EVENT_READING_S3:
+            ESP_LOGI(__FUNCTION__, "Reading S3 event triggered");
+            new_status = !status_room_cur.reading_s3_status;
+            handle_event_reading_s3(new_status);
+            strcpy(state_inout.key, "S3_READ");
+            strcpy(state_inout.value, new_status ? "true" : "false");
+            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             break;
 
         case EVENT_MASTER_M3:
@@ -249,42 +285,6 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
             strcpy(state_inout.value, new_status ? "true" : "false");
             push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             ESP_LOGI(__FUNCTION__, "Master M3 event triggered");
-            break;
-
-        case EVENT_DECORATION_S2:
-            new_status = !status_room_cur.decoration_s2_status;
-            handle_event_decoration_s2(new_status);
-            strcpy(state_inout.key, "S2_DECORATE");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
-            ESP_LOGI(__FUNCTION__, "Decoration S2 event triggered");
-            break;
-
-        case EVENT_DECORATION_S3:
-            new_status = !status_room_cur.decoration_s3_status;
-            handle_event_decoration_s3(new_status);
-            strcpy(state_inout.key, "S3_DECORATE");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
-            ESP_LOGI(__FUNCTION__, "Decoration S3 event triggered");
-            break;
-
-        case EVENT_COVER_LIGHT:
-            ESP_LOGI(__FUNCTION__, "Cover light event triggered");
-            new_status = !status_room_cur.cover_light_status;
-            handle_event_cover_light(new_status);
-            strcpy(state_inout.key, "S3_COVER");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
-            break;
-
-        case EVENT_READING_S3:
-            ESP_LOGI(__FUNCTION__, "Reading S3 event triggered");
-            new_status = !status_room_cur.reading_s3_status;
-            handle_event_reading_s3(new_status);
-            strcpy(state_inout.key, "S3_READ");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             break;
 
         default:

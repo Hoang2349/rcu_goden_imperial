@@ -13,15 +13,15 @@ typedef struct status_room
 {
     bool master_m1_status;
     bool toilet_status;
-    bool bathroom_status;
+    bool wc_light_status;
     bool minibar_status;
     bool master_m2_status;
     bool reading_s2_status;
-    bool sport_light_status;
-    bool decoration_s2_status;
-    bool decoration_s3_status;
+    bool ceiling_light_s2_status;
+    bool night_light_s2_status;
+    bool night_light_s3_status;
     bool master_m3_status;
-    bool cover_light_status;
+    bool ceiling_light_s3_status;
     bool reading_s3_status;
 } status_room_t;
 
