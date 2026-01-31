@@ -1,0 +1,263 @@
+#include "queue.h"
+#include "../Modbus/modbus_rcu.h"
+#include "../DigitalIO/digitalIO.h"
+uint8_t btn_arr[NUM_OF_QUEUE_BTN] = {NULL};
+
+/**
+   @brief Them nut nhan vao back cua queue.
+
+   @param btnValue - Gia tri nut nhan duoc them vao.
+
+   @return NULL
+*/
+void enQueueButton(uint8_t btnValue)
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_BTN; i++)
+  {
+    if (btn_arr[i] == NULL)
+    {
+      btn_arr[i] = btnValue;
+      break;
+    }
+  }
+}
+
+/**
+   @brief Lay phan tu front cua queue.
+
+   @param NULL
+
+   @return uint8_t: Gia tri phan tu front cua queue.
+*/
+uint8_t peekQueueButton()
+{
+  uint8_t returnValue = NULL;
+  if (btn_arr[0] != NULL)
+  {
+    returnValue = btn_arr[0];
+  }
+  return returnValue;
+}
+
+/**
+   @brief Xoa phan tu front cua queue.
+
+   @param NULL
+
+   @return Xoa phan tu front, cap nhat cac phan tu dang sau vao truoc.
+*/
+void deQueueButton()
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_BTN; i++)
+  {
+      btn_arr[i] = btn_arr[i + 1];
+      btn_arr[i + 1] = NULL;
+  }
+}
+
+/**
+   @brief Xoa toan bo phan tu cua queue.
+
+   @param NULL
+
+   @return Tat ca phan tu bang NULL.
+*/
+void cleanQueueButton()
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_BTN; i++)
+  {
+    btn_arr[i] = NULL;
+  }
+}
+
+/**
+   @brief Kiem tra queue co rong hay khong
+
+   @param NULL
+
+   @return uint8_t: TRUE or FALSE.
+*/
+uint8_t isEmptyQueueButton()
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_BTN; i++)
+  {
+    if (btn_arr[i] != NULL)
+    {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+/**
+   @brief Kiem tra queue da day hay chua
+
+   @param NULL
+
+   @return uint8_t: TRUE or FALSE.
+*/
+uint8_t isFullQueueButton()
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_BTN; i++)
+  {
+    if (btn_arr[i] == NULL)
+    {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+void displayQueueButton()
+{
+  writeRS();
+  // mySerial.println("Queue: ");
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_BTN; i++)
+  {
+    mySerial.print(i);
+    mySerial.print(" = ");
+    mySerial.println(btn_arr[i]);
+  }
+  readRS();
+}
+
+void displayControlTriac()
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_TRIAC_ONOFFF; i++)
+  {
+    if (digital_output_arr_p[i] != NULL)
+    {
+      writeRS();
+      // mySerial.println("Queue: ");
+      for (uint8_t i = 0; i < NUM_OF_QUEUE_TRIAC_ONOFFF; i++)
+      {
+        mySerial.print("Queue Triac ");
+        mySerial.print(i);
+        mySerial.print(" = ");
+        mySerial.println(digital_output_arr_p[i]->outputTriac);
+      }
+      readRS();
+    }
+  }
+}
+
+void enQueueControlTriac(digital_output_t *digital_output_p)
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_TRIAC_ONOFFF; i++)
+  {
+    if (digital_output_arr_p[i] == NULL)
+    {
+      digital_output_arr_p[i] = (digital_output_t *)malloc(sizeof(digital_output_t));
+      digital_output_arr_p[i]->outputTriac = digital_output_p->outputTriac;
+      digital_output_arr_p[i]->outputRelay = digital_output_p->outputRelay;
+      digital_output_arr_p[i]->timePointRelayOnoff = digital_output_p->timePointRelayOnoff;
+      digital_output_arr_p[i]->outputStatus = digital_output_p->outputStatus;
+
+      // displayControlTriac();
+      break;
+    }
+  }
+}
+
+/**
+   @brief Lay phan tu front cua queue.
+
+   @param NULL
+
+   @return digital_output_t: Gia tri phan tu front cua queue.
+*/
+digital_output_t *peekQueueControlTriac()
+{
+  digital_output_t *returnValue = NULL;
+  if (digital_output_arr_p[0] != NULL)
+  {
+    returnValue = digital_output_arr_p[0];
+#ifdef DEBUG_CONTROL_TRIAC
+    writeRS();
+    // mySerial.println("Queue: ");
+    mySerial.print("Peek Queue Triac = ");
+    mySerial.println(digital_output_arr_p[0]->outputTriac);
+    readRS();
+#endif
+  }
+  return returnValue;
+}
+
+/**
+   @brief Xoa phan tu front cua queue.
+
+   @param NULL
+
+   @return Xoa phan tu front, cap nhat cac phan tu dang sau vao truoc.
+*/
+void deQueueControlTriac()
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_TRIAC_ONOFFF; i++)
+  {
+
+    if (digital_output_arr_p[i] != NULL)
+    {
+      free(digital_output_arr_p[i]);
+      digital_output_arr_p[i] = NULL;
+      if (digital_output_arr_p[i + 1] != NULL)
+      {
+        enQueueControlTriac(digital_output_arr_p[i + 1]);
+      }
+    }
+
+  }
+}
+
+/**
+   @brief Xoa toan bo phan tu cua queue.
+
+   @param NULL
+
+   @return Tat ca phan tu bang NULL.
+*/
+void cleanQueueControlTriac()
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_TRIAC_ONOFFF; i++)
+  {
+    free((digital_output_t *)(digital_output_arr_p[i]));
+    digital_output_arr_p[i] = NULL;
+  }
+}
+
+/**
+   @brief Kiem tra queue co rong hay khong
+
+   @param NULL
+
+   @return uint8_t: TRUE or FALSE.
+*/
+uint8_t isEmptyQueueControlTriac()
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_TRIAC_ONOFFF; i++)
+  {
+    if (digital_output_arr_p[i] != NULL)
+    {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+/**
+   @brief Kiem tra queue da day hay chua
+
+   @param NULL
+
+   @return uint8_t: TRUE or FALSE.
+*/
+uint8_t isFullQueueControlTriac()
+{
+  for (uint8_t i = 0; i < NUM_OF_QUEUE_TRIAC_ONOFFF; i++)
+  {
+    if (digital_output_arr_p[i] == NULL)
+    {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}

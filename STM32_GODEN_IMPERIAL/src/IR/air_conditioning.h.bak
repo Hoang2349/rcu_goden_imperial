@@ -1,0 +1,150 @@
+/**
+   @file hvac_mitsubishi.h
+   @author hieunv (hieunv@elifetech.vm)
+   @brief ham dieu khien dieu hoa hang Mitsubishi.
+   Ref:
+   + https://gitlab.com/elife-technology/hardware/rcu-v2/-/tree/example_stm32_ir/driver/IRremoteESP8266
+   + https://github.com/crankyoldgit/IRremoteESP8266
+
+   @version 0.1
+   @date 2022-10-03
+
+   @copyright Copyright (c) 2022
+
+*/
+
+#ifndef AIR_CONDITIONING_h
+#define AIR_CONDITIONING_h
+
+#include <arduino.h>
+
+#define CHANNEL_PIN_1 PA2
+#define CHANNEL_PIN_2 PA3
+
+#define NUMB_STT_POWER  2
+#define NUMB_STT_FAN    3
+#define NUMB_STT_MODE   4
+
+//Define type of air conditioning here
+#define SUMMIT_MITSUBISHI
+//#define SUMMIT_DAIKIN
+
+enum ir_channed
+{
+  CHANNEL_1 = 1,
+  CHANNEL_2 = 2
+};
+
+enum power {
+  POWER_ON    = 0x01,
+  POWER_OFF   = 0x00
+};
+
+enum mode {
+  Auto        = 0,
+  Cool        = 1,
+  Dry         = 2,
+  Fan         = 3,
+  Heat        = 4   //additional case
+};
+
+enum fan {
+  FanAuto  = 0x0,   //additional case
+  FanLow   = 0x1,
+  FanMed   = 0x2,
+  FanHigh  = 0x3,
+  FanMax   = 0x4,   //additional case
+  FanEcono = 0x6,   //additional case
+  FanTurbo = 0x8    //additional case
+};
+
+enum swingVertical {
+  SwingVAuto       = 0,
+  SwingVHighest    = 1,
+  SwingVHigh       = 2,
+  SwingVMiddle     = 3,
+  SwingVLow        = 4,
+  SwingVLowest     = 5,
+  SwingVOff        = 6
+};
+
+enum setSwingHorizontal {
+  SwingHAuto 		= 0,
+  SwingHLeftMax 	= 1,
+  SwingHLeft 		= 2,
+  SwingHMiddle 	= 3,
+  SwingHRight 		= 4,
+  SwingHRightMax 	= 5,
+  SwingHRightLeft 	= 6,
+  SwingHLeftRight 	= 7,
+  SwingHOff 		= 8
+};
+
+void mapParamIr(uint16_t* power, uint16_t* fan, uint16_t* mode, uint16_t* temperature);
+void controlAirConditioning(uint16_t channel, uint16_t power, uint16_t fan, uint16_t mode, uint16_t temperature);
+
+#ifdef SUMMIT_MITSUBISHI
+#include "ir_MitsubishiHeavy.h"
+
+#define IR_TEMP_MIN  18
+#define IR_TEMP_MAX  32
+
+//power
+#define IR_POWER_ON   0x00
+#define IR_POWER_OFF  0x01
+
+//fan
+#define IR_FAN_LOW   kMitsubishiHeavy152FanLow
+#define IR_FAN_MED   kMitsubishiHeavy152FanMed
+#define IR_FAN_HIGH  kMitsubishiHeavy152FanHigh
+
+//mode
+#define IR_AUTO     kMitsubishiHeavyAuto
+#define IR_COOL     kMitsubishiHeavyCool
+#define IR_DRY      kMitsubishiHeavyDry
+#define IR_FAN      kMitsubishiHeavyFan
+
+void controlHVACMitsubishi(uint16_t channel, uint16_t power, uint16_t fan, uint16_t mode, uint16_t temperature);
+#endif
+
+#ifdef SUMMIT_DAIKIN
+#include "ir_Daikin.h"
+#define IR_TEMP_MIN  18
+#define IR_TEMP_MAX  32
+
+//power
+#define IR_POWER_ON   0x00
+#define IR_POWER_OFF  0x01
+
+//fan
+#define IR_FAN_LOW   0x01
+#define IR_FAN_MED   0x02
+#define IR_FAN_HIGH  0x03
+
+//mode
+#define IR_AUTO     kDaikin176Auto
+#define IR_COOL     kDaikin176Cool
+#define IR_DRY      kDaikin176Dry
+#define IR_FAN      kDaikin176Fan
+
+void controlHVACDaikin(uint16_t channel, uint16_t power, uint16_t fan, uint16_t mode, uint16_t temperature);
+#endif
+
+static uint16_t mapPower[2][NUMB_STT_POWER] =
+{
+  {POWER_ON, POWER_OFF},
+  {IR_POWER_ON, IR_POWER_OFF}
+};
+
+static uint16_t mapFan[2][NUMB_STT_FAN] =
+{
+  {FanLow, FanMed, FanHigh},
+  {IR_FAN_LOW, IR_FAN_MED, IR_FAN_HIGH}
+};
+
+static uint16_t mapMode[2][NUMB_STT_MODE] =
+{
+  {Auto, Cool, Dry, Fan},
+  {IR_AUTO, IR_COOL, IR_DRY, IR_FAN}
+};
+#endif

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    form {
+      border: 3px solid #110e0e;
+    }
+
+    input[type=text],
+    input[type=password] {
+      width: 100%;
+      padding: 12px 20px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    logo {
+      font-family: Algerian, sans-serif;
+      /* Thay đổi font chữ thành Arial hoặc font chữ sans-serif mặc định trên hệ thống */
+      font-size: 50px;
+      /* Thay đổi kích thước chữ thành 16px */
+      color: #3c1da1;
+      /* Đổi màu chữ thành #333 (màu xám đậm) */
+    }
+
+    button {
+      background-color: #04AA6D;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    .cancelbtn {
+      width: auto;
+      padding: 10px 18px;
+      background-color: #f44336;
+    }
+
+    .imgcontainer {
+      text-align: center;
+      margin: 24px 0 12px 0;
+    }
+
+    img.avatar {
+      width: 30%;
+      border-radius: 0%;
+      resize: none;
+    }
+
+    .login {
+      margin: auto;
+      max-width: 350px;
+    }
+
+    .container {
+      padding: 16px;
+
+    }
+
+    span.psw {
+      float: right;
+      padding-top: 16px;
+    }
+
+    /* Change styles for span and cancel button on extra small screens */
+    @media screen and (max-width: 300px) {
+      span.psw {
+        display: block;
+        float: none;
+      }
+
+      .cancelbtn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login">
+    <form class="login-form" style="width: 400px;; height: 400px;;" enctype="application/x-www-form-urlencoded">
+      <div class="imgcontainer">
+       <logo> Elife </logo>
+      </div>
+      <div class="container">
+        <label for="uname"><b>Username</b></label>
+        <input type="text" placeholder="Enter Username" name="uname" required>
+        <label for="psw"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" name="psw" required>
+        <button type="submit">Login</button>
+        <label>
+          <input type="checkbox" checked="checked" name="remember"> Remember me
+        </label>
+        <span class="psw">Forgot <a href="#">password?</a></span>
+      </div>
+    </form>
+  </div>
+  <script>
+
+
+    function handleFormSubmit(event) {
+      event.preventDefault();
+
+      const data = new FormData(event.target);
+
+      const formJSON = Object.fromEntries(data.entries());
+
+      // console.log('AAAA');
+
+      // for multi-selects, we need special handling
+      //formJSON.snacks = data.getAll('snacks');
+
+      //const results = document.querySelector('.results pre');
+      //results.innerText = JSON.stringify(formJSON, null, 2);
+      //console.log(JSON.stringify(formJSON, null, 2)); 
+      var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+      var theUrl = "/login";
+
+      xmlhttp.open("POST", theUrl);
+      // console.log('BBBB');
+
+      window.location.href = "/upload";
+
+
+      xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+      // console.log('CCCC');
+
+      xmlhttp.send(JSON.stringify(formJSON, null, 2));
+      return false;
+    }
+    const form = document.querySelector('.login-form');
+    form.addEventListener('submit', handleFormSubmit);
+  </script>
+</body>
+
+</html>

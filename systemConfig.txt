@@ -1,0 +1,18 @@
+{
+    "ipConfig": {
+        "ip": "192.168.1.23",
+        "gateway": "192.168.1.1",
+        "netmask": "255.255.255.0"
+    },
+    "mqttConfig": {
+        "broker": "mqtt://18.140.61.221",
+        "port": 1883,
+        "username": "iJQYfZSUjvyoT2qQxfX0"
+    },
+	"httpOtaConfig": {
+		"host": "18.140.61.221",
+		"port": 80,
+		"title": "GODEN_IMPERIAL",
+		"username": "iJQYfZSUjvyoT2qQxfX0"
+	}
+}

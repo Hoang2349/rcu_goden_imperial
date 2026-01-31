@@ -1,0 +1,31 @@
+#ifndef QUEUE_h
+#define QUEUE_h
+
+#include <Arduino.h>
+#include "../DigitalIO/digitalIO.h"
+
+//#define NULL 0
+#define NUM_OF_QUEUE_BTN 10
+#define NUM_OF_QUEUE_TRIAC_ONOFFF 10
+#define TRUE 1
+#define FALSE 0
+
+extern uint8_t btn_arr[NUM_OF_QUEUE_BTN];
+static digital_output_t* digital_output_arr_p[NUM_OF_QUEUE_TRIAC_ONOFFF];
+
+void enQueueButton(uint8_t btnValue);
+uint8_t peekQueueButton();
+void deQueueButton();
+void cleanQueueButton();
+uint8_t isEmptyQueueButton();
+uint8_t isFullQueueButton();
+void displayQueueButton();
+
+void displayControlTriac();
+void enQueueControlTriac(digital_output_t* digital_output_p);
+digital_output_t* peekQueueControlTriac();
+void deQueueControlTriac();
+void cleanQueueControlTriac();
+uint8_t isEmptyQueueControlTriac();
+uint8_t isFullQueueControlTriac();
+#endif

@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "queuemodbusouput.h": "c",
+        "ruleengine.h": "c",
+        "hashtable.h": "c"
+    }
+}

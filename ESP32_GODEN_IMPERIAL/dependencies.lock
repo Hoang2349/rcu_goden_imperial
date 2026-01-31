@@ -1,0 +1,21 @@
+dependencies:
+  bblanchon/arduinojson:
+    component_hash: 3e140c209c598a37cd5c58defe05f6dbf2cc1a8b6e85d33885ecc8c2817d2e1f
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 6.21.4
+  idf:
+    component_hash: null
+    source:
+      type: idf
+    version: 5.1.2
+  thingsboard/ThingsBoard:
+    component_hash: 5d4551099858627f761495ee101f5cd9cf7b09c9afa68e6fc69218382b90e9c3
+    source:
+      service_url: https://api.components.espressif.com/
+      type: service
+    version: 0.12.0
+manifest_hash: 325ca5285afca40cdc2b372d49266383e5a055002d84d5391be1b234686be18a
+target: esp32
+version: 1.0.0

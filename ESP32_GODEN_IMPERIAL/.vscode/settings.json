@@ -1,0 +1,33 @@
+{
+    "idf.adapterTargetName": "esp32",
+    "files.associations": {
+        "app_spiffs.h": "c",
+        "common.h": "c",
+        "app_ethernet.h": "c",
+        "app_cmd_mqtt.h": "c",
+        "hashtable.h": "c",
+        "app_cmd_rs485.h": "c",
+        "ruleengine.h": "c",
+        "queueinput.h": "c",
+        "handleoutputqueue.h": "c",
+        "queuemodbusoutput.h": "c",
+        "parsescen.h": "c",
+        "app_ap_config.h": "c",
+        "app_http_server.h": "c",
+        "appethernet.h": "c",
+        "appspiffs.h": "c",
+        "mqtt.h": "c",
+        "mapsystem.h": "c",
+        "pb_decode.h": "c",
+        "app_control_output.h": "c",
+        "app_main_goden.h": "c",
+        "otastm32.h": "c",
+        "httpsotarcu.h": "c",
+        "app_goden_imperial_common.h": "c",
+        "app_handle_input.h": "c",
+        "string.h": "c",
+        "modbus.h": "c",
+        "vector": "cpp"
+    },
+    "idf.flashType": "JTAG"
+}

@@ -1,0 +1,11 @@
+Language: Cpp
+BasedOnStyle: Google
+IndentWidth: 4
+UseTab: Never
+# gioi han 80 ki tu tren 1 line
+ColumnLimit: 80
+# Khai bao con tro dau * o ben trai
+PointerAlignment: Right 
+BreakBeforeBraces: Allman
+AlwaysBreakTemplateDeclarations: true
+
