@@ -9,6 +9,7 @@
 #include "RuleEngine.h"
 #include "app_control_output.h"
 #include "app_goden_imperial_common.h"
+#include "app_nvs_config.h"
 #include "cJSON.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -24,7 +25,6 @@
 
 QueueHandle_t state_queue;
 QueueHandle_t mqtt_set_queue;
-double time_door_ajar = TIMEOUT_DOOR_AJAR;
 
 static esp_mqtt_client_handle_t client;
 
@@ -418,6 +418,9 @@ void handle_data_mqtt_set(sMqttPkg_t *mqttPkg)
             {
                 time_crossing_set = (uint32_t)timeoutUnoccupied->valuedouble;
                 printf("TIMEOUT UNOCCUPIED: %ld\n", time_crossing_set);
+                app_nvs_config_t config_data = {time_crossing_set,
+                                                time_door_ajar};
+                goden_inperial_write_config_data(&config_data);
             }
 
             esp_mqtt_client_publish(client, TOPIC_DEVICE_TELEMETRY, json_string,
@@ -435,6 +438,9 @@ void handle_data_mqtt_set(sMqttPkg_t *mqttPkg)
             if (pms_room_status.status_room == ROOM_UNRENT)
             {
                 time_door_ajar = timeout_door_ajar->valuedouble;
+                app_nvs_config_t config_data = {time_crossing_set,
+                                                time_door_ajar};
+                goden_inperial_write_config_data(&config_data);
                 printf("TIMEOUT DOOR AJAR: %f\n", time_door_ajar);
             }
             esp_mqtt_client_publish(client, TOPIC_DEVICE_TELEMETRY, json_string,

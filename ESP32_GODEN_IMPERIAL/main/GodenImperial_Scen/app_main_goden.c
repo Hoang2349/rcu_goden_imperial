@@ -9,8 +9,10 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
+#include "app_nvs_config.h"
 
-#define MAX_TIME_CROSSING 30 * 60  // 30 minutes
+#define DEFAULT_TIME_CROSSING 30 * 60  // 30 minutes
+#define DEFAULT_TIME_DOOR_AJAR 6      // 6 seconds
 
 // define version
 
@@ -22,8 +24,9 @@ status_sensor_t status_sensor;
 state_setback_t state_setback;
 status_outdoor_t status_outdoor = {false};
 
-uint32_t time_crossing = MAX_TIME_CROSSING;
-uint32_t time_crossing_set = MAX_TIME_CROSSING;
+uint32_t time_crossing = DEFAULT_TIME_CROSSING;
+uint32_t time_crossing_set = DEFAULT_TIME_CROSSING;
+double time_door_ajar = DEFAULT_TIME_DOOR_AJAR;
 uint8_t flag_staff_mode = INACTIVE;
 
 void init_status_room()
@@ -104,6 +107,7 @@ void rule_room_hotel()
                 if (pms_room_status.flag_checkin_first)
                 {
                     handle_scene_welcome();
+                    pms_room_status.status_human = OCCUPIED;
                     pms_room_status.flag_checkin_first = false;
                     temp = true;
                     char *json_string = create_json_dynamic(
@@ -243,8 +247,21 @@ void init_goden_imperial()
     state_setback.led[10].value = 0X00;
     state_setback.led[11].index = LED_READING_S3;
     state_setback.led[11].value = 0X00;
-
     init_goden_imperial_input();
+    app_nvs_config_t config_data = {0};
+    if (goden_inperial_read_config_data(&config_data) == ESP_OK)
+    {
+        time_crossing_set = config_data.time_crossing;
+        time_door_ajar = config_data.time_door_ajar;
+        ESP_LOGI(__FUNCTION__, "Loaded config data from NVS: time_crossing=%ld, time_door_ajar=%f",
+                 time_crossing_set, time_door_ajar);
+    }
+    else
+    {
+        ESP_LOGW(__FUNCTION__, "No config data found in NVS, using defaults.");
+        time_crossing_set = DEFAULT_TIME_CROSSING;
+        time_door_ajar = DEFAULT_TIME_DOOR_AJAR;
+    }
     xTaskCreate(syn_status_room, "Task syn status switch", 4086, NULL, 5, NULL);
     xTaskCreate(rule_room_hotel, "Rule hotel management", 4086, NULL, 6, NULL);
 }

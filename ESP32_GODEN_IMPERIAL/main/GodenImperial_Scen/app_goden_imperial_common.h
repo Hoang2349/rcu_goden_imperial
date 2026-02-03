@@ -8,7 +8,6 @@
 
 #define MAX_RELAY_CONTROL 14
 #define MAX_LED_CONTROL 12
-#define TIMEOUT_DOOR_AJAR (6)              // 10 seconds
 typedef struct status_room
 {
     bool master_m1_status;

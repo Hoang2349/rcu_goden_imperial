@@ -92,7 +92,7 @@ void hanlde_mode_outdoor(void *param)
     {
         static uint16_t count = 0;
         // if DND enable disable MUR and Bell
-        vTaskDelay(pdMS_TO_TICKS(100));  // Delay 1 giây
+        vTaskDelay(pdMS_TO_TICKS(100));  // Delay 0.1 giây
         if (status_outdoor.status_bell)
         {
             scene_bell();
