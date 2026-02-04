@@ -26,7 +26,7 @@
 
 //=================define version for esp32==================
 // version release project GODEN IMPERIAL RCU
-char *versionEsp32 = "1.2.0";
+char *versionEsp32 = "1.2.4";
 //=================end define version for esp32==================
 
 char versionStm32[MAX_LENGTH_NAME_VERSION] = {0};
@@ -491,6 +491,12 @@ void httpsOtaEsp32()
         .method = HTTP_METHOD_GET,
         .user_data = localRespondBuffer,
     };
+
+    // debug config https
+    ESP_LOGI(__FUNCTION__, "Host: %s", config.host);
+    ESP_LOGI(__FUNCTION__, "Port: %d", config.port);
+    ESP_LOGI(__FUNCTION__, "Path: %s", config.path);
+
     esp_http_client_handle_t client = esp_http_client_init(&config);
     esp_err_t err = esp_http_client_perform(client);
     vTaskDelay(TIME_WAIT_HTTP_REQ);

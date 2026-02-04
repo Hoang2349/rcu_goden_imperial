@@ -102,6 +102,7 @@ static void mqttEventHandler(void *handlerArgs, esp_event_base_t base,
 
             push_infor_version_ota(versionEsp32, "UPDATED",
                                    DEFAULT_TITLE_GODEN_IMPERIAL);
+            publish_data_mqtt("{\"fw_state\": \"UPDATED\"}");
             esp_mqtt_client_publish(client, TOPIC_DEVICE_TELEMETRY,
                                     "{\"OFS\":\"ONLINE\"}", 0, QOS_SET_LEVEL,
                                     0);
