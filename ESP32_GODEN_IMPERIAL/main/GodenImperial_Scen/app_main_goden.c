@@ -74,7 +74,7 @@ void rule_room_hotel()
                 flag_staff_mode == ACTIVE)
             {
                 vTaskDelay(pdMS_TO_TICKS(5000));
-                handle_scene_unrentd();
+                handle_scene_unrented();
                 flag_staff_mode = INACTIVE;
                 continue;
             }

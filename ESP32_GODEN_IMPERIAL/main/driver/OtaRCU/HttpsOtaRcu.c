@@ -26,7 +26,7 @@
 
 //=================define version for esp32==================
 // version release project GODEN IMPERIAL RCU
-char *versionEsp32 = "1.2.4";
+char *versionEsp32 = "1.2.5";
 //=================end define version for esp32==================
 
 char versionStm32[MAX_LENGTH_NAME_VERSION] = {0};

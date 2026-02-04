@@ -355,7 +355,7 @@ void handle_data_mqtt_set(sMqttPkg_t *mqttPkg)
             {
                 // set status room unrented
                 pms_room_status.status_room = ROOM_UNRENT;
-                handle_scene_unrentd();
+                handle_scene_unrented();
             }
             esp_mqtt_client_publish(client, TOPIC_DEVICE_TELEMETRY, json_string,
                                     0, QOS_SET_LEVEL, 1);
@@ -387,7 +387,7 @@ void handle_data_mqtt_set(sMqttPkg_t *mqttPkg)
                 }
                 else if (strcmp(value, "UNRENTED") == 0)
                 {
-                    handle_scene_unrentd();
+                    handle_scene_unrented();
                 }
                 if (strcmp(value, "OCC") == 0)
                 {

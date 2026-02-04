@@ -81,7 +81,6 @@ void scene_master_m1_on()
     generate_relay_command(RELAY_C1, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C1, true);
-
 }
 void scene_master_m1_off()
 {
@@ -109,7 +108,7 @@ void scene_master_m2_off()
 
 void scene_master_m3_on()
 {
-   char data_send[MAX_DATA_SIZE] = {0};
+    char data_send[MAX_DATA_SIZE] = {0};
     generate_relay_command(RELAY_C1, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C1, true);
@@ -311,7 +310,6 @@ void scene_idu_off()
     push_state_inout_mqtt(RELAY_IDU, false);  // Added push state for IDU off
 }
 
-
 // Event Handlers
 void handle_event_master_m1(bool new_status)
 {
@@ -320,6 +318,23 @@ void handle_event_master_m1(bool new_status)
     status_room_new.master_m1_status = new_status;
     status_room_new.master_m2_status = new_status;
     status_room_new.master_m3_status = new_status;
+
+    // Update the MQTT state for master M1
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S1_M1");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+    // S2_M2
+    memset(&state_inout, 0, sizeof(state_in_out_t));
+    strcpy(state_inout.key, "S2_M2");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+    // S3_M3
+    memset(&state_inout, 0, sizeof(state_in_out_t));
+    strcpy(state_inout.key, "S3_M3");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
@@ -329,6 +344,23 @@ void handle_event_master_m2(bool new_status)
     status_room_new.master_m1_status = new_status;
     status_room_new.master_m2_status = new_status;
     status_room_new.master_m3_status = new_status;
+
+    // Update the MQTT state for master M2
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S1_M1");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+    // S2_M2
+    memset(&state_inout, 0, sizeof(state_in_out_t));
+    strcpy(state_inout.key, "S2_M2");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+    // S3_M3
+    memset(&state_inout, 0, sizeof(state_in_out_t));
+    strcpy(state_inout.key, "S3_M3");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
@@ -336,6 +368,12 @@ void handle_event_toilet(bool new_status)
 {
     set_scene_status(new_status, scene_toilet_on, scene_toilet_off);
     status_room_new.toilet_status = new_status;
+    // Update the MQTT state for toilet
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S1A_TOILET");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
@@ -343,6 +381,12 @@ void handle_event_wc_light(bool new_status)
 {
     set_scene_status(new_status, scene_wc_light_on, scene_wc_light_off);
     status_room_new.wc_light_status = new_status;
+    // Update the MQTT state for WC light
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S1A_WC");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
@@ -350,6 +394,12 @@ void handle_event_minibar(bool new_status)
 {
     set_scene_status(new_status, scene_minibar_on, scene_minibar_off);
     status_room_new.minibar_status = new_status;
+    // Update the MQTT state for minibar
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S4_MINIBAR");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
@@ -357,6 +407,11 @@ void handle_event_reading_s2(bool new_status)
 {
     set_scene_status(new_status, scene_reading_s2_on, scene_reading_s2_off);
     status_room_new.reading_s2_status = new_status;
+    // Update the MQTT state for reading S2
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S2_READ");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
     flag_syn_status_room = true;
 }
 
@@ -364,6 +419,12 @@ void handle_event_ceiling_s2(bool new_status)
 {
     set_scene_status(new_status, scene_ceiling_s2_on, scene_ceiling_s2_off);
     status_room_new.ceiling_light_s2_status = new_status;
+    // Update the MQTT state for ceiling S2
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S2_CEILING");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
@@ -372,6 +433,18 @@ void handle_event_night_s2(bool new_status)
     set_scene_status(new_status, scene_night_light_on, scene_night_light_off);
     status_room_new.night_light_s2_status = new_status;
     status_room_new.night_light_s3_status = new_status;
+
+    // Update the MQTT state for night light S2-NIGHT
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S2_NIGHT");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+    // S3-NIGHT
+    memset(&state_inout, 0, sizeof(state_in_out_t));
+    strcpy(state_inout.key, "S3_NIGHT");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
@@ -380,6 +453,18 @@ void handle_event_night_s3(bool new_status)
     set_scene_status(new_status, scene_night_light_on, scene_night_light_off);
     status_room_new.night_light_s3_status = new_status;
     status_room_new.night_light_s2_status = new_status;
+
+    // Update the MQTT state for night light S2-NIGHT
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S2_NIGHT");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+    // S3-NIGHT
+    memset(&state_inout, 0, sizeof(state_in_out_t));
+    strcpy(state_inout.key, "S3_NIGHT");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
@@ -389,36 +474,64 @@ void handle_event_master_m3(bool new_status)
     status_room_new.master_m3_status = new_status;
     status_room_new.master_m2_status = new_status;
     status_room_new.master_m1_status = new_status;
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S1_M1");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+    // S2_M2
+    memset(&state_inout, 0, sizeof(state_in_out_t));
+    strcpy(state_inout.key, "S2_M2");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+    // S3_M3
+    memset(&state_inout, 0, sizeof(state_in_out_t));
+    strcpy(state_inout.key, "S3_M3");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
 void handle_event_ceiling_s3(bool new_status)
 {
     set_scene_status(new_status, scene_ceiling_s3_on, scene_ceiling_s3_off);
-    flag_syn_status_room = true;
     status_room_new.ceiling_light_s3_status = new_status;
+    // Update the MQTT state for ceiling S3
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S3_CEILING");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+    flag_syn_status_room = true;
 }
 
 void handle_event_reading_s3(bool new_status)
 {
     set_scene_status(new_status, scene_reading_s3_on, scene_reading_s3_off);
     status_room_new.reading_s3_status = new_status;
+
+    // Update the MQTT state for reading S3
+    state_in_out_t state_inout = {0};
+    strcpy(state_inout.key, "S3_READ");
+    strcpy(state_inout.value, new_status ? "true" : "false");
+    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
     flag_syn_status_room = true;
 }
 
 void scene_on_all()
 {
-    //on all
+    // on all
     bool on_status = true;
-    scene_master_m1_on();
-    scene_toilet_on();
-    scene_wc_light_on();
-    scene_minibar_on();
-    scene_reading_s2_on();
-    scene_ceiling_s2_on();
-    scene_night_light_on();
-    scene_ceiling_s3_on();
-    scene_reading_s3_on();
+
+    handle_event_master_m1(on_status);
+    handle_event_toilet(on_status);
+    handle_event_wc_light(on_status);
+    handle_event_minibar(on_status);
+    handle_event_reading_s2(on_status);
+    handle_event_ceiling_s2(on_status);
+    handle_event_night_s2(on_status);
+    handle_event_ceiling_s3(on_status);
+    handle_event_reading_s3(on_status);
     status_room_new.master_m1_status = on_status;
     status_room_new.master_m2_status = on_status;
     status_room_new.master_m3_status = on_status;
@@ -436,17 +549,17 @@ void scene_on_all()
 
 void scene_off_all()
 {
-    //off all
+    // off all
     bool off_status = false;
-    scene_master_m1_off();
-    scene_toilet_off();
-    scene_wc_light_off();
-    scene_minibar_off();
-    scene_reading_s2_off();
-    scene_ceiling_s2_off();
-    scene_night_light_off();
-    scene_ceiling_s3_off();
-    scene_reading_s3_off();
+    handle_event_master_m1(off_status);
+    handle_event_toilet(off_status);
+    handle_event_wc_light(off_status);
+    handle_event_minibar(off_status);
+    handle_event_reading_s2(off_status);
+    handle_event_ceiling_s2(off_status);
+    handle_event_night_s2(off_status);
+    handle_event_ceiling_s3(off_status);
+    handle_event_reading_s3(off_status);
     status_room_new.master_m1_status = off_status;
     status_room_new.master_m2_status = off_status;
     status_room_new.master_m3_status = off_status;
@@ -462,11 +575,13 @@ void scene_off_all()
     flag_syn_status_room = true;
 }
 
-void handle_scene_unrentd()
+void handle_scene_unrented()
 {
     scene_off_all();
     scene_itc_off();
     scene_idu_off();
+    scene_dnd(false);
+    scene_mur(false);
     char *json_string =
         create_json_dynamic("ROOM_STATUS", "UNRENTED", TYPE_STRING);
     publish_data_mqtt(json_string);
@@ -501,6 +616,8 @@ void handle_scene_welcome()
     scene_on_all();
     scene_itc_on();
     scene_idu_on();
+    scene_dnd(false);
+    scene_mur(false);
     char *json_string =
         create_json_dynamic("ROOM_STATUS", "WELCOME", TYPE_STRING);
     publish_data_mqtt(json_string);
@@ -590,14 +707,19 @@ void handle_led_status()
     HANDLE_LED_STATUS(minibar_status, hanlde_led_switch, LED_MINIBAR);
     HANDLE_LED_STATUS(master_m2_status, hanlde_led_switch, LED_MASTER_M2);
     HANDLE_LED_STATUS(reading_s2_status, hanlde_led_switch, LED_READING_S2);
-    HANDLE_LED_STATUS(ceiling_light_s2_status, hanlde_led_switch, LED_SPORT_LIGHT);
+    HANDLE_LED_STATUS(ceiling_light_s2_status, hanlde_led_switch,
+                      LED_SPORT_LIGHT);
     HANDLE_LED_STATUS(night_light_s2_status, hanlde_led_switch,
                       LED_DECORATION_S2);
     HANDLE_LED_STATUS(night_light_s3_status, hanlde_led_switch,
                       LED_DECORATION_S3);
     HANDLE_LED_STATUS(master_m3_status, hanlde_led_switch, LED_MASTER_M3);
-    HANDLE_LED_STATUS(ceiling_light_s3_status, hanlde_led_switch, LED_COVER_LIGHT);
+    HANDLE_LED_STATUS(ceiling_light_s3_status, hanlde_led_switch,
+                      LED_COVER_LIGHT);
     HANDLE_LED_STATUS(reading_s3_status, hanlde_led_switch, LED_READING_S3);
+
+    // update status button current
+    status_room_cur.master_m1_status = status_room_new.master_m1_status;
 }
 
 // handle upadte status setback
@@ -679,7 +801,7 @@ void scene_bell()
     modbusWrite(data_send, MAX_DATA_SIZE);
 }
 
-void scene_mur(uint8_t status)
+void scene_mur(bool status)
 {
     char data_send[MAX_DATA_SIZE] = {0};
     state_in_out_t state_inout = {0};
@@ -703,7 +825,7 @@ void scene_mur(uint8_t status)
     }
 }
 
-void scene_dnd(uint8_t status)
+void scene_dnd(bool status)
 {
     char data_send[MAX_DATA_SIZE] = {0};
     state_in_out_t state_inout = {0};

@@ -182,26 +182,17 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
         case EVENT_MASTER_M1:
             new_status = !status_room_cur.master_m1_status;
             handle_event_master_m1(new_status);
-            strcpy(state_inout.key, "S1_M1");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             ESP_LOGI(__FUNCTION__, "Master M1 event triggered");
             break;
 
         case EVENT_TOILET:
             new_status = !status_room_cur.toilet_status;
-            strcpy(state_inout.key, "S1A_TOILET");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
-            ESP_LOGI(__FUNCTION__, "Toilet event triggered");
             handle_event_toilet(new_status);
+            ESP_LOGI(__FUNCTION__, "Toilet event triggered");
             break;
 
         case EVENT_WC_LIGHTING:
             new_status = !status_room_cur.wc_light_status;
-            strcpy(state_inout.key, "S1A_WC");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             handle_event_wc_light(new_status);
             ESP_LOGI(__FUNCTION__, "WC Lighting event triggered");
             break;
@@ -209,54 +200,36 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
         case EVENT_MINIBAR:
             new_status = !status_room_cur.minibar_status;
             handle_event_minibar(new_status);
-            strcpy(state_inout.key, "S4_MINIBAR");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             ESP_LOGI(__FUNCTION__, "Minibar event triggered");
             break;
 
         case EVENT_MASTER_M2:
             new_status = !status_room_cur.master_m2_status;
             handle_event_master_m2(new_status);
-            strcpy(state_inout.key, "S2_M2");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             ESP_LOGI(__FUNCTION__, "Master M2 event triggered");
             break;
 
         case EVENT_READING_S2:
             new_status = !status_room_cur.reading_s2_status;
             handle_event_reading_s2(new_status);
-            strcpy(state_inout.key, "S2_READ");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             ESP_LOGI(__FUNCTION__, "Reading S2 event triggered");
             break;
 
         case EVENT_CEILING_S2:
             new_status = !status_room_cur.ceiling_light_s2_status;
             handle_event_ceiling_s2(new_status);
-            strcpy(state_inout.key, "S2_CEILING");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             ESP_LOGI(__FUNCTION__, "Ceiling S2 event triggered");
             break;
             
         case EVENT_NIGHT_LIGHT_S2:
             new_status = !status_room_cur.night_light_s2_status;
             handle_event_night_s2(new_status);
-            strcpy(state_inout.key, "S2_NIGHT");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             ESP_LOGI(__FUNCTION__, "Night Light S2 event triggered");
             break;
 
         case EVENT_NIGHT_LIGHT_S3:
             new_status = !status_room_cur.night_light_s3_status;
             handle_event_night_s3(new_status);
-            strcpy(state_inout.key, "S3_NIGHT");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             ESP_LOGI(__FUNCTION__, "Night Light S3 event triggered");
             break;
             
@@ -264,26 +237,17 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
             ESP_LOGI(__FUNCTION__, "Ceiling S3 event triggered");
             new_status = !status_room_cur.ceiling_light_s3_status;
             handle_event_ceiling_s3(new_status);
-            strcpy(state_inout.key, "S3_CEILING");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             break;
             
         case EVENT_READING_S3:
             ESP_LOGI(__FUNCTION__, "Reading S3 event triggered");
             new_status = !status_room_cur.reading_s3_status;
             handle_event_reading_s3(new_status);
-            strcpy(state_inout.key, "S3_READ");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             break;
 
         case EVENT_MASTER_M3:
             new_status = !status_room_cur.master_m3_status;
             handle_event_master_m3(new_status);
-            strcpy(state_inout.key, "S3_M3");
-            strcpy(state_inout.value, new_status ? "true" : "false");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
             ESP_LOGI(__FUNCTION__, "Master M3 event triggered");
             break;
 

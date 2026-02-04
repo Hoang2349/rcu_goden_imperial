@@ -89,7 +89,7 @@ void handle_event_master_m3(bool new_status);
 void handle_event_ceiling_s3(bool new_status);
 void handle_event_reading_s3(bool new_status);
 
-void handle_scene_unrentd();
+void handle_scene_unrented();
 void handle_scene_staff_mode();
 void handle_scene_welcome();
 void handle_scene_standby();
@@ -102,8 +102,8 @@ void update_setback_status_led(uint8_t index, uint8_t value);
 void update_setback_status_room();
 
 void scene_bell();
-void scene_dnd(uint8_t status);
-void scene_mur(uint8_t status);
+void scene_dnd(bool status);
+void scene_mur(bool status);
 
 void push_state_inout_mqtt(int index, bool value);
 
