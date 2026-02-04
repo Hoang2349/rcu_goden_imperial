@@ -159,6 +159,9 @@ void scene_reading_s2_on()
     generate_relay_command(RELAY_C6, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C6, true);
+    generate_relay_command(RELAY_C11, true, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C11, true);
 }
 void scene_reading_s2_off()
 {
@@ -166,6 +169,9 @@ void scene_reading_s2_off()
     generate_relay_command(RELAY_C6, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C6, false);
+    generate_relay_command(RELAY_C11, false, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C11, false);
 }
 void scene_ceiling_s2_on()
 {
@@ -221,6 +227,9 @@ void scene_reading_s3_on()
     generate_relay_command(RELAY_C8, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C8, true);
+    generate_relay_command(RELAY_C12, true, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C12, true);
 }
 void scene_reading_s3_off()
 {
@@ -228,6 +237,9 @@ void scene_reading_s3_off()
     generate_relay_command(RELAY_C8, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_C8, false);
+    generate_relay_command(RELAY_C12, false, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C12, false);
 }
 
 void scene_minibar_on()
