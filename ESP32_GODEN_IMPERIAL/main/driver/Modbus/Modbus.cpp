@@ -230,7 +230,7 @@ bool rs485Reciver()
                 static TickType_t last_door_event_time = 0;
                 static const TickType_t DOOR_DEBOUNCE_TIME = pdMS_TO_TICKS(500); // 100ms debounce time
                 
-                // Kiểm tra xem có phải là sự kiện cửa không (giả sử pin_active là data[5], status là data[4])
+                                // Kiểm tra xem có phải là sự kiện cửa không (giả sử pin_active là data[5], status là data[4])
                 uint8_t pin_active = data[5];
                 uint8_t status = data[4];
                 
@@ -238,28 +238,26 @@ bool rs485Reciver()
                 {
                     TickType_t current_time = xTaskGetTickCount();
                     
-                    // Luôn cập nhật thời gian sự kiện mới, nhưng chỉ xử lý nếu đủ thời gian debounce
-                    if ((current_time - last_door_event_time) < DOOR_DEBOUNCE_TIME)
-                    {
-                        // Kiểm tra nếu trạng thái giống với trạng thái trước đó
-                        if (status == last_door_status) {
-                            ESP_LOGW(__FUNCTION__, "Duplicate door event filtered due to debounce, elapsed: %d ms", 
-                                     (int)((current_time - last_door_event_time) * 1000 / configTICK_RATE_HZ));
-                            // Bỏ qua sự kiện này
-                        } else {
-                            // Trạng thái khác với trước đó, nhưng vẫn trong thời gian debounce
-                            // Cập nhật trạng thái mới nhưng không gửi vào queue
-                            last_door_status = status;
-                            ESP_LOGW(__FUNCTION__, "Door state changed but still in debounce period, elapsed: %d ms", 
-                                     (int)((current_time - last_door_event_time) * 1000 / configTICK_RATE_HZ));
-                        }
-                    }
-                    else
-                    {
-                        // Đã qua đủ thời gian debounce, xử lý sự kiện
+                    // Nếu trạng thái thay đổi so với trạng thái trước đó
+                    if (status != last_door_status) {
+                        // Ghi nhận thời gian bắt đầu cho trạng thái mới
                         last_door_status = status;
                         last_door_event_time = current_time;
-                        queueInputStm32Push(data);
+                        
+                        // Ghi nhận sự kiện này nhưng chưa xử lý ngay
+                        // Chỉ xử lý nếu trạng thái duy trì đủ lâu
+                        ESP_LOGI(__FUNCTION__, "Door state changed to %d, recording start time", status);
+                    } else {
+                        // Trạng thái không thay đổi, kiểm tra thời gian duy trì
+                        if ((current_time - last_door_event_time) >= pdMS_TO_TICKS(3000)) { // 3 seconds minimum duration
+                            // Trạng thái đã duy trì đủ lâu, xử lý sự kiện
+                            ESP_LOGI(__FUNCTION__, "Door state %d maintained for required duration, processing event", status);
+                            queueInputStm32Push(data);
+                        } else {
+                            // Trạng thái chưa duy trì đủ lâu, không xử lý
+                            ESP_LOGW(__FUNCTION__, "Door state %d not maintained long enough, ignoring event (elapsed: %d ms)", 
+                                     status, (int)((current_time - last_door_event_time) * 1000 / configTICK_RATE_HZ));
+                        }
                     }
                 }
                 else
