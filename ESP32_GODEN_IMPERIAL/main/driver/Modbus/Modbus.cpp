@@ -225,7 +225,40 @@ bool rs485Reciver()
             // handleMessageRS485(data, len);
             if (len == LENGTH_INPUT_STM32)
             {
-                queueInputStm32Push(data);
+                // Kiểm tra và xử lý chống nhiễu cho tín hiệu cửa
+                static uint8_t last_door_status = 0xFF; // Giá trị ban đầu không hợp lệ
+                static TickType_t last_door_event_time = 0;
+                static const TickType_t DOOR_DEBOUNCE_TIME = pdMS_TO_TICKS(100); // 100ms debounce time
+                
+                // Kiểm tra xem có phải là sự kiện cửa không (giả sử pin_active là data[5], status là data[4])
+                uint8_t pin_active = data[5];
+                uint8_t status = data[4];
+                
+                if (pin_active == 0x07) // EVENT_DOOR
+                {
+                    TickType_t current_time = xTaskGetTickCount();
+                    
+                    // Nếu sự kiện cửa giống với sự kiện trước đó và thời gian ngắn hơn ngưỡng debounce
+                    if (status == last_door_status && 
+                        (current_time - last_door_event_time) < DOOR_DEBOUNCE_TIME)
+                    {
+                        ESP_LOGW(__FUNCTION__, "Door event filtered due to debounce, elapsed: %d ms", 
+                                 (int)((current_time - last_door_event_time) * 1000 / configTICK_RATE_HZ));
+                        // Bỏ qua sự kiện này
+                    }
+                    else
+                    {
+                        // Cập nhật thông tin sự kiện mới
+                        last_door_status = status;
+                        last_door_event_time = current_time;
+                        queueInputStm32Push(data);
+                    }
+                }
+                else
+                {
+                    // Đối với các sự kiện khác, vẫn xử lý bình thường
+                    queueInputStm32Push(data);
+                }
             }
         }
         ESP_LOGW(__FUNCTION__, "=============================================");
