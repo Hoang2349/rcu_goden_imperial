@@ -316,13 +316,31 @@ void handle_event_master_m1(bool new_status)
     // bool new_status = !status_room_cur.master_m1_status;
     set_scene_status(new_status, scene_master_m1_on, scene_master_m1_off);
     status_room_new.master_m1_status = new_status;
+    status_room_new.toilet_status = new_status;
+    status_room_new.wc_light_status = new_status;
+    status_room_new.minibar_status = new_status;
     status_room_new.master_m2_status = new_status;
+    status_room_new.reading_s2_status = new_status;
+    status_room_new.ceiling_light_s2_status = new_status;
+    status_room_new.night_light_s2_status = new_status;
+    status_room_new.night_light_s3_status = new_status;
     status_room_new.master_m3_status = new_status;
+    status_room_new.ceiling_light_s3_status = new_status;
+    status_room_new.reading_s3_status = new_status;
 
     // Cập nhật trạng thái setback để đảm bảo các thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
     state_setback.status_room.master_m1_status = new_status;
+    state_setback.status_room.toilet_status = new_status;
+    state_setback.status_room.wc_light_status = new_status;
+    state_setback.status_room.minibar_status = new_status;
     state_setback.status_room.master_m2_status = new_status;
+    state_setback.status_room.reading_s2_status = new_status;
+    state_setback.status_room.ceiling_light_s2_status = new_status;
+    state_setback.status_room.night_light_s2_status = new_status;
+    state_setback.status_room.night_light_s3_status = new_status;
     state_setback.status_room.master_m3_status = new_status;
+    state_setback.status_room.ceiling_light_s3_status = new_status;
+    state_setback.status_room.reading_s3_status = new_status;
 
     // Update the MQTT state for master M1
     state_in_out_t state_inout = {0};
