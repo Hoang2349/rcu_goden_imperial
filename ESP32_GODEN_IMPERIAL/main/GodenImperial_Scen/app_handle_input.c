@@ -215,12 +215,22 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
             break;
 
         case EVENT_MOTION:
-            ESP_LOGI(__FUNCTION__, "Motion event triggered");
-            status_sensor.flag_motion_sensor = status;
+            ESP_LOGI(__FUNCTION__, "Motion event triggered with raw status: %d", status);
+            
+            // Đảo ngược logic cho cảm biến chuyển động
+            // Khi nút nhấn được nhấn (status=0), coi như có chuyển động
+            // Khi nút nhấn được nhả (status=1), coi như không có chuyển động
+            bool motion_detected = !status;  // Đảo ngược giá trị
+            
+            status_sensor.flag_motion_sensor = motion_detected;
             strcpy(state_inout.key, "OCCSEN");
-            strcpy(state_inout.value, status ? "true" : "false");
+            strcpy(state_inout.value, motion_detected ? "true" : "false");
             push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
-            // TODO: add handle reset motion sensor AFETR TIMEOUT
+            
+            ESP_LOGI(__FUNCTION__, "Processed motion event - Raw status: %d, Motion detected: %d, MQTT value: %s", 
+                     status, motion_detected, motion_detected ? "true" : "false");
+            
+            // TODO: add handle reset motion sensor AFTER TIMEOUT
             break;
 
         case EVENT_MASTER_M1:
