@@ -236,31 +236,9 @@ bool rs485Reciver()
                 
                 if (pin_active == 0x07) // EVENT_DOOR
                 {
-                    static uint8_t current_stable_state = 0xFF; // Trạng thái ổn định hiện tại (không hợp lệ ban đầu)
-                    static TickType_t state_start_time = 0; // Thời gian bắt đầu của trạng thái hiện tại
-                    TickType_t current_time = xTaskGetTickCount();
-
-                    // Nếu trạng thái thay đổi so với trạng thái ổn định trước đó
-                    if (status != current_stable_state) {
-                        // Ghi nhận thời gian bắt đầu cho trạng thái mới
-                        current_stable_state = status;
-                        state_start_time = current_time;
-
-                        ESP_LOGI(__FUNCTION__, "Door state changed to %d, recording start time", status);
-                    } 
-                    // Trạng thái không thay đổi, kiểm tra thời gian duy trì
-                    else if ((current_time - state_start_time) >= pdMS_TO_TICKS(3000)) { // 3 seconds minimum duration
-                        // Trạng thái hiện tại đã duy trì đủ lâu, xử lý sự kiện
-                        ESP_LOGI(__FUNCTION__, "Door state %d maintained for required duration, processing event", status);
-                        queueInputStm32Push(data);
-                        
-                        // Cập nhật lại thời gian bắt đầu để tránh xử lý lặp lại cùng một sự kiện
-                        state_start_time = current_time;
-                    } else {
-                        // Trạng thái chưa duy trì đủ lâu, không xử lý
-                        ESP_LOGW(__FUNCTION__, "Door state %d not maintained long enough, ignoring event (elapsed: %d ms)", 
-                                 status, (int)((current_time - state_start_time) * 1000 / configTICK_RATE_HZ));
-                    }
+                    // Xử lý sự kiện cửa - truyền dữ liệu vào queue để xử lý ở tầng ứng dụng
+                    // Cơ chế chống nhiễu sẽ được áp dụng ở tầng ứng dụng
+                    queueInputStm32Push(data);
                 }
                 else
                 {

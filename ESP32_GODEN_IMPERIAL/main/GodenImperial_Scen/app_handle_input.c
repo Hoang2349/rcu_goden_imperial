@@ -15,6 +15,11 @@ QueueHandle_t queueInputStm32;
 static TickType_t last_door_event_time = 0;
 static const TickType_t DOOR_LOCKOUT_TIME = pdMS_TO_TICKS(100); // 100ms lockout time
 
+// Biến để theo dõi trạng thái ổn định của cửa
+static uint8_t current_stable_door_state = 0xFF; // Trạng thái ổn định hiện tại (không hợp lệ ban đầu)
+static TickType_t door_state_start_time = 0; // Thời gian bắt đầu của trạng thái hiện tại
+static const TickType_t DOOR_STABLE_DURATION = pdMS_TO_TICKS(3000); // 3 seconds minimum duration
+
 
 /**
  * @brief Ham khoi tao queue input tu STM32
@@ -197,21 +202,44 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
             // Cập nhật thời gian sự kiện mới
             last_door_event_time = current_time;
 
-            // Cập nhật trạng thái cảm biến ngay lập tức
-            bool new_status = status;
+            // Áp dụng cơ chế chống nhiễu tại tầng ứng dụng
+            // Chỉ xử lý sự kiện nếu trạng thái đã duy trì đủ lâu
+            if (status != current_stable_door_state) {
+                // Trạng thái thay đổi, ghi nhận thời gian bắt đầu cho trạng thái mới
+                current_stable_door_state = status;
+                door_state_start_time = current_time;
 
-            ESP_LOGI(__FUNCTION__, "Raw status: %d, previous flag_door_sensor: %d",
-                     new_status, status_sensor.flag_door_sensor);
+                ESP_LOGI(__FUNCTION__, "Door state changed to %d, recording start time", status);
+            } else {
+                // Trạng thái không thay đổi, kiểm tra thời gian duy trì
+                if ((current_time - door_state_start_time) >= DOOR_STABLE_DURATION) {
+                    // Trạng thái hiện tại đã duy trì đủ lâu, xử lý sự kiện
+                    ESP_LOGI(__FUNCTION__, "Door state %d maintained for required duration, processing event", status);
+                    
+                    // Cập nhật trạng thái cảm biến
+                    bool new_status = status;
 
-            // Cập nhật trạng thái cảm biến
-            status_sensor.flag_door_sensor = new_status;
-            strcpy(state_inout.key, "DOOR");
-            strcpy(state_inout.value, new_status ? "false" : "true");
-            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+                    ESP_LOGI(__FUNCTION__, "Raw status: %d, previous flag_door_sensor: %d",
+                             new_status, status_sensor.flag_door_sensor);
 
-            // Luôn đánh dấu có sự kiện mới khi nhận được tín hiệu từ cảm biến cửa
-            status_sensor.new_status_door_sensor = true;
-            ESP_LOGI(__FUNCTION__, "Updated flag_door_sensor to: %d and set new_status_door_sensor to true", new_status);
+                    // Cập nhật trạng thái cảm biến
+                    status_sensor.flag_door_sensor = new_status;
+                    strcpy(state_inout.key, "DOOR");
+                    strcpy(state_inout.value, new_status ? "false" : "true");
+                    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+
+                    // Đánh dấu có sự kiện mới
+                    status_sensor.new_status_door_sensor = true;
+                    ESP_LOGI(__FUNCTION__, "Updated flag_door_sensor to: %d and set new_status_door_sensor to true", new_status);
+                    
+                    // Cập nhật lại thời gian bắt đầu để tránh xử lý lặp lại
+                    door_state_start_time = current_time;
+                } else {
+                    // Trạng thái chưa duy trì đủ lâu, không xử lý
+                    ESP_LOGW(__FUNCTION__, "Door state %d not maintained long enough, ignoring event (elapsed: %d ms)", 
+                             status, (int)((current_time - door_state_start_time) * 1000 / configTICK_RATE_HZ));
+                }
+            }
             break;
 
         case EVENT_MOTION:
