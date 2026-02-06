@@ -758,6 +758,21 @@ void handle_scene_setback()
         state_setback.status_room.ceiling_light_s3_status;
     status_room_new.reading_s3_status =
         state_setback.status_room.reading_s3_status;
+    
+    // Cập nhật trực tiếp status_room_cur để đảm bảo trạng thái được đồng bộ ngay lập tức
+    status_room_cur.master_m1_status = status_room_new.master_m1_status;
+    status_room_cur.toilet_status = status_room_new.toilet_status;
+    status_room_cur.wc_light_status = status_room_new.wc_light_status;
+    status_room_cur.minibar_status = status_room_new.minibar_status;
+    status_room_cur.master_m2_status = status_room_new.master_m2_status;
+    status_room_cur.reading_s2_status = status_room_new.reading_s2_status;
+    status_room_cur.ceiling_light_s2_status = status_room_new.ceiling_light_s2_status;
+    status_room_cur.night_light_s2_status = status_room_new.night_light_s2_status;
+    status_room_cur.night_light_s3_status = status_room_new.night_light_s3_status;
+    status_room_cur.master_m3_status = status_room_new.master_m3_status;
+    status_room_cur.ceiling_light_s3_status = status_room_new.ceiling_light_s3_status;
+    status_room_cur.reading_s3_status = status_room_new.reading_s3_status;
+    
     flag_syn_status_room = true;
 }
 //===============led indicate===================//

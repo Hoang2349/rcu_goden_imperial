@@ -217,10 +217,10 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
         case EVENT_MOTION:
             ESP_LOGI(__FUNCTION__, "Motion event triggered with raw status: %d", status);
 
-            // Logic cho cảm biến chuyển động thực tế
-            // Khi cảm biến phát hiện chuyển động (status=1), đánh dấu có chuyển động
-            // Khi cảm biến không phát hiện chuyển động (status=0), đánh dấu không có chuyển động
-            bool motion_detected = status;  // Không đảo ngược giá trị
+            // Đảo ngược logic cho cảm biến chuyển động (dành cho mô phỏng bằng nút nhấn)
+            // Khi nút nhấn được nhấn (status=0), coi như có chuyển động
+            // Khi nút nhấn được nhả (status=1), coi như không có chuyển động
+            bool motion_detected = !status;  // Đảo ngược giá trị
 
             status_sensor.flag_motion_sensor = motion_detected;
             strcpy(state_inout.key, "OCCSEN");
