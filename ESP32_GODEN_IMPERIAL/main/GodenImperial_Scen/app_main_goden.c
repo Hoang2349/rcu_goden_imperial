@@ -120,10 +120,9 @@ void rule_room_hotel()
                 else
                 {
                     // Nếu không phải lần đầu tiên và đang ở trạng thái standby (UNOCCUPIED)
-                    if (pms_room_status.status_human == UNOCCUPIED)
-                    {
-                        handle_scene_setback();  // Áp dụng lại trạng thái setback
-                    }
+                    // Không áp dụng lại trạng thái setback khi cửa mở, chỉ áp dụng khi có chuyển động
+                    // Trạng thái setback sẽ được áp dụng khi phát hiện chuyển động và chuyển sang trạng thái OCCUPIED
+                    ESP_LOGI(__FUNCTION__, "Door opened but room is in standby (UNOCCUPIED), waiting for motion to apply setback");
                 }
                 continue;
             }

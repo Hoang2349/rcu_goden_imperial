@@ -100,6 +100,7 @@ void handle_led_status();
 void update_setback_status_relay(uint8_t index, uint8_t value);
 void update_setback_status_led(uint8_t index, uint8_t value);
 void update_setback_status_room();
+void update_all_setback_relays_from_current_states();
 
 void scene_bell();
 void scene_dnd(bool status);

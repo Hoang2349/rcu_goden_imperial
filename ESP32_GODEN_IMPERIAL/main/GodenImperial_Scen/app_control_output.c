@@ -679,9 +679,97 @@ void handle_scene_welcome()
     free(json_string);
 }
 
+/**
+ * Updates all relay setback states based on current logical device states
+ */
+void update_all_setback_relays_from_current_states()
+{
+    ESP_LOGI(__FUNCTION__, "Updating all relay setback states from current device states...");
+    
+    // Based on initialization in app_main_goden.c: state_setback.relay[i].index = RELAY_C1 + i
+    // So relay[0].index = 14 (RELAY_C1), relay[1].index = 15, ..., relay[13].index = 27
+    
+    for (int i = 0; i < MAX_RELAY_CONTROL; i++) {
+        uint8_t relay_index = state_setback.relay[i].index;
+        
+        switch (relay_index) {
+            case 14: // RELAY_C1 - Master M1, M2, M3
+                state_setback.relay[i].value = (status_room_cur.master_m1_status || 
+                                              status_room_cur.master_m2_status || 
+                                              status_room_cur.master_m3_status) ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (C1) to %d based on master lights status", 
+                         relay_index, state_setback.relay[i].value);
+                break;
+            case 15: // RELAY_IDU or RELAY_C1 + 1
+                // Assuming this is for IDU based on the pattern
+                state_setback.relay[i].value = 0x00; // Default to off, adjust as needed
+                ESP_LOGD(__FUNCTION__, "Setting relay %d to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 16: // RELAY_C1 + 2 - Toilet
+                state_setback.relay[i].value = status_room_cur.toilet_status ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (Toilet) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 17: // RELAY_C1 + 3 - WC Light
+                state_setback.relay[i].value = status_room_cur.wc_light_status ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (WC Light) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 18: // RELAY_C1 + 4 - Ceiling S3
+                state_setback.relay[i].value = status_room_cur.ceiling_light_s3_status ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (Ceiling S3) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 19: // RELAY_C1 + 5 - Night Light
+                state_setback.relay[i].value = (status_room_cur.night_light_s2_status || 
+                                              status_room_cur.night_light_s3_status) ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (Night Light) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 20: // RELAY_C1 + 6 - Reading S2
+                state_setback.relay[i].value = status_room_cur.reading_s2_status ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (Reading S2) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 21: // RELAY_C1 + 7 - Ceiling S2
+                state_setback.relay[i].value = status_room_cur.ceiling_light_s2_status ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (Ceiling S2) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 22: // RELAY_C1 + 8 - Reading S3
+                state_setback.relay[i].value = status_room_cur.reading_s3_status ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (Reading S3) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 23: // RELAY_C1 + 9 - Minibar
+                state_setback.relay[i].value = status_room_cur.minibar_status ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (Minibar) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 24: // RELAY_C1 + 10 - Bell related
+                state_setback.relay[i].value = 0x00; // Default to off
+                ESP_LOGD(__FUNCTION__, "Setting relay %d to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 25: // RELAY_C1 + 11 - Reading S2 related
+                state_setback.relay[i].value = status_room_cur.reading_s2_status ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (Reading S2 related) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 26: // RELAY_C1 + 12 - Reading S3 related
+                state_setback.relay[i].value = status_room_cur.reading_s3_status ? 0xFF : 0x00;
+                ESP_LOGD(__FUNCTION__, "Setting relay %d (Reading S3 related) to %d", relay_index, state_setback.relay[i].value);
+                break;
+            case 27: // RELAY_C1 + 13 - Additional relay
+                state_setback.relay[i].value = 0x00; // Default to off
+                ESP_LOGD(__FUNCTION__, "Setting relay %d to %d", relay_index, state_setback.relay[i].value);
+                break;
+            default:
+                // Unknown relay index, keep current value or set to default
+                ESP_LOGW(__FUNCTION__, "Unknown relay index %d", relay_index);
+                break;
+        }
+    }
+    
+    ESP_LOGI(__FUNCTION__, "Completed updating all relay setback states.");
+}
+
 void handle_scene_standby()
 {
+    // Save current state as setback state before turning devices off
     update_setback_status_room();
+    // Also update all relay setback states based on current logical states
+    update_all_setback_relays_from_current_states();
     
     scene_off_all();
     scene_itc_off();
@@ -695,6 +783,7 @@ void handle_scene_standby()
 
 void handle_scene_occupied()
 {
+    ESP_LOGI(__FUNCTION__, "Starting occupied scene activation...");
     handle_scene_setback();
     scene_itc_on();
     scene_idu_on();
@@ -711,9 +800,16 @@ void handle_scene_occupied()
 
 void handle_scene_setback()
 {
+    ESP_LOGI(__FUNCTION__, "Starting to restore from setback state...");
+    
+    // Set the flag to indicate we're currently restoring from setback
+    is_restoring_from_setback = true;
+    
     for (int i = 0; i < MAX_RELAY_CONTROL; i++)
     {
         char data_send[MAX_DATA_SIZE] = {0};
+        ESP_LOGD(__FUNCTION__, "Restoring relay %d to value %d", 
+                 state_setback.relay[i].index, state_setback.relay[i].value);
         generate_relay_command(state_setback.relay[i].index,
                                state_setback.relay[i].value, data_send);
         modbusWrite(data_send, MAX_DATA_SIZE);
@@ -743,6 +839,11 @@ void handle_scene_setback()
     status_room_new.reading_s3_status =
         state_setback.status_room.reading_s3_status;
     flag_syn_status_room = true;
+    
+    // Reset the flag after restoration is complete
+    is_restoring_from_setback = false;
+    
+    ESP_LOGI(__FUNCTION__, "Completed restoration from setback state.");
 }
 //===============led indicate===================//
 
@@ -779,12 +880,18 @@ void handle_led_status()
 }
 
 // handle upadte status setback
+// Global variable to track if we're currently restoring from setback
+static bool is_restoring_from_setback = false;
+
 void update_setback_status_relay(uint8_t index, uint8_t value)
 {
-    ESP_LOGD(__FUNCTION__, "Updating relay %d status to %d, current human status: %s", 
-             index, value, pms_room_status.status_human == OCCUPIED ? "OCCUPIED" : "UNOCCUPIED");
+    ESP_LOGD(__FUNCTION__, "Updating relay %d status to %d, current human status: %s, restoring from setback: %s", 
+             index, value, pms_room_status.status_human == OCCUPIED ? "OCCUPIED" : "UNOCCUPIED",
+             is_restoring_from_setback ? "YES" : "NO");
     
-    if ((pms_room_status.status_human == OCCUPIED))
+    // Only update setback state if we're not currently restoring from setback
+    // and the room is occupied
+    if (!is_restoring_from_setback && (pms_room_status.status_human == OCCUPIED))
     {
         for (int i = 0; i < MAX_RELAY_CONTROL; i++)
         {
@@ -798,6 +905,10 @@ void update_setback_status_relay(uint8_t index, uint8_t value)
             }
         }
     }
+    else if (is_restoring_from_setback)
+    {
+        ESP_LOGW(__FUNCTION__, "Skipping setback update for relay %d during restoration process", index);
+    }
     else
     {
         ESP_LOGW(__FUNCTION__, "Not updating relay %d, room is not occupied (status_human: %s)", 
@@ -807,10 +918,13 @@ void update_setback_status_relay(uint8_t index, uint8_t value)
 
 void update_setback_status_led(uint8_t index, uint8_t value)
 {
-    ESP_LOGD(__FUNCTION__, "Updating LED %d status to %d, current human status: %s", 
-             index, value, pms_room_status.status_human == OCCUPIED ? "OCCUPIED" : "UNOCCUPIED");
-    
-    if ((pms_room_status.status_human == OCCUPIED))
+    ESP_LOGD(__FUNCTION__, "Updating LED %d status to %d, current human status: %s, restoring from setback: %s",
+             index, value, pms_room_status.status_human == OCCUPIED ? "OCCUPIED" : "UNOCCUPIED",
+             is_restoring_from_setback ? "YES" : "NO");
+
+    // Only update setback state if we're not currently restoring from setback
+    // and the room is occupied
+    if (!is_restoring_from_setback && (pms_room_status.status_human == OCCUPIED))
     {
         for (int i = 0; i < MAX_LED_CONTROL; i++)
         {
@@ -818,28 +932,35 @@ void update_setback_status_led(uint8_t index, uint8_t value)
             {
                 uint8_t old_value = state_setback.led[i].value;
                 state_setback.led[i].value = value;
-                ESP_LOGI(__FUNCTION__, "LED %d status updated from %d to %d", 
+                ESP_LOGI(__FUNCTION__, "LED %d status updated from %d to %d",
                          index, old_value, value);
                 break;
             }
         }
     }
+    else if (is_restoring_from_setback)
+    {
+        ESP_LOGW(__FUNCTION__, "Skipping setback update for LED %d during restoration process", index);
+    }
     else
     {
-        ESP_LOGW(__FUNCTION__, "Not updating LED %d, room is not occupied (status_human: %s)", 
+        ESP_LOGW(__FUNCTION__, "Not updating LED %d, room is not occupied (status_human: %s)",
                  index, pms_room_status.status_human ? "OCCUPIED" : "UNOCCUPIED");
     }
 }
 
 void update_setback_status_room()
 {
-    ESP_LOGD(__FUNCTION__, "Updating setback status room, current human status: %s", 
-             pms_room_status.status_human == OCCUPIED ? "OCCUPIED" : "UNOCCUPIED");
-    
-    if ((pms_room_status.status_human == OCCUPIED))
+    ESP_LOGD(__FUNCTION__, "Updating setback status room, current human status: %s, restoring from setback: %s",
+             pms_room_status.status_human == OCCUPIED ? "OCCUPIED" : "UNOCCUPIED",
+             is_restoring_from_setback ? "YES" : "NO");
+
+    // Only update setback state if we're not currently restoring from setback
+    // and the room is occupied
+    if (!is_restoring_from_setback && (pms_room_status.status_human == OCCUPIED))
     {
         ESP_LOGI(__FUNCTION__, "Updating all device states in setback configuration");
-        
+
         state_setback.status_room.master_m1_status =
             status_room_cur.master_m1_status;
         state_setback.status_room.toilet_status = status_room_cur.toilet_status;
@@ -863,12 +984,16 @@ void update_setback_status_room()
             status_room_cur.ceiling_light_s3_status;
         state_setback.status_room.reading_s3_status =
             status_room_cur.reading_s3_status;
-        
+
         ESP_LOGI(__FUNCTION__, "Setback status room updated successfully");
+    }
+    else if (is_restoring_from_setback)
+    {
+        ESP_LOGW(__FUNCTION__, "Skipping setback status room update during restoration process");
     }
     else
     {
-        ESP_LOGW(__FUNCTION__, "Not updating setback status room, room is not occupied (status_human: %s)", 
+        ESP_LOGW(__FUNCTION__, "Not updating setback status room, room is not occupied (status_human: %s)",
                  pms_room_status.status_human ? "OCCUPIED" : "UNOCCUPIED");
     }
 }
