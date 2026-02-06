@@ -13,7 +13,7 @@ QueueHandle_t queueInputStm32;
 
 // Biến để theo dõi thời gian khóa cho cảm biến cửa
 static TickType_t last_door_event_time = 0;
-static const TickType_t DOOR_LOCKOUT_TIME = pdMS_TO_TICKS(100); // 100ms lockout time
+static const TickType_t DOOR_LOCKOUT_TIME = pdMS_TO_TICKS(500); // 500ms lockout time
 
 
 /**

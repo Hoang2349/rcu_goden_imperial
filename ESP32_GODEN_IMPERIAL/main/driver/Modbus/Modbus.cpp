@@ -234,17 +234,8 @@ bool rs485Reciver()
                 uint8_t pin_active = data[5];
                 uint8_t status = data[4];
                 
-                if (pin_active == 0x07) // EVENT_DOOR
-                {
-                    // Xử lý sự kiện cửa - truyền dữ liệu vào queue để xử lý ở tầng ứng dụng
-                    // Cơ chế chống nhiễu sẽ được áp dụng ở tầng ứng dụng
-                    queueInputStm32Push(data);
-                }
-                else
-                {
-                    // Đối với các sự kiện khác, vẫn xử lý bình thường
-                    queueInputStm32Push(data);
-                }
+                // Gửi dữ liệu vào queue để xử lý ở tầng ứng dụng
+                queueInputStm32Push(data);
             }
         }
         ESP_LOGW(__FUNCTION__, "=============================================");
