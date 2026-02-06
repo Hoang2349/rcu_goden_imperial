@@ -236,47 +236,30 @@ bool rs485Reciver()
                 
                 if (pin_active == 0x07) // EVENT_DOOR
                 {
-                    static TickType_t door_state_start_time = 0; // Thời gian bắt đầu của trạng thái hiện tại
+                    static uint8_t current_stable_state = 0xFF; // Trạng thái ổn định hiện tại (không hợp lệ ban đầu)
+                    static TickType_t state_start_time = 0; // Thời gian bắt đầu của trạng thái hiện tại
                     TickType_t current_time = xTaskGetTickCount();
 
-                    // Nếu trạng thái thay đổi so với trạng thái trước đó
-                    if (status != last_door_status) {
-                        // Kiểm tra xem trạng thái trước đó đã duy trì đủ lâu chưa
-                        if ((current_time - door_state_start_time) >= pdMS_TO_TICKS(3000)) { // 3 seconds minimum duration
-                            // Trạng thái trước đó đã duy trì đủ lâu, xử lý sự kiện cho trạng thái trước
-                            ESP_LOGI(__FUNCTION__, "Previous door state %d was maintained for required duration, processing event", 
-                                     last_door_status);
-                            
-                            // Tạo lại dữ liệu với trạng thái trước để gửi vào queue
-                            uint8_t temp_data[LENGTH_INPUT_STM32];
-                            memcpy(temp_data, data, LENGTH_INPUT_STM32);
-                            temp_data[4] = last_door_status; // Trạng thái trước đó
-                            queueInputStm32Push(temp_data);
-                        } else {
-                            // Trạng thái trước đó chưa duy trì đủ lâu, không xử lý
-                            ESP_LOGW(__FUNCTION__, "Previous door state %d was not maintained long enough (elapsed: %d ms)", 
-                                     last_door_status, (int)((current_time - door_state_start_time) * 1000 / configTICK_RATE_HZ));
-                        }
-                        
+                    // Nếu trạng thái thay đổi so với trạng thái ổn định trước đó
+                    if (status != current_stable_state) {
                         // Ghi nhận thời gian bắt đầu cho trạng thái mới
-                        last_door_status = status;
-                        door_state_start_time = current_time;
+                        current_stable_state = status;
+                        state_start_time = current_time;
 
-                        ESP_LOGI(__FUNCTION__, "Door state changed to %d, recording new start time", status);
+                        ESP_LOGI(__FUNCTION__, "Door state changed to %d, recording start time", status);
+                    } 
+                    // Trạng thái không thay đổi, kiểm tra thời gian duy trì
+                    else if ((current_time - state_start_time) >= pdMS_TO_TICKS(3000)) { // 3 seconds minimum duration
+                        // Trạng thái hiện tại đã duy trì đủ lâu, xử lý sự kiện
+                        ESP_LOGI(__FUNCTION__, "Door state %d maintained for required duration, processing event", status);
+                        queueInputStm32Push(data);
+                        
+                        // Cập nhật lại thời gian bắt đầu để tránh xử lý lặp lại cùng một sự kiện
+                        state_start_time = current_time;
                     } else {
-                        // Trạng thái không thay đổi, kiểm tra thời gian duy trì
-                        if ((current_time - door_state_start_time) >= pdMS_TO_TICKS(3000)) { // 3 seconds minimum duration
-                            // Trạng thái hiện tại đã duy trì đủ lâu, xử lý sự kiện
-                            ESP_LOGI(__FUNCTION__, "Door state %d maintained for required duration, processing event", status);
-                            queueInputStm32Push(data);
-                            
-                            // Cập nhật lại thời gian bắt đầu để tránh xử lý lặp lại
-                            door_state_start_time = current_time;
-                        } else {
-                            // Trạng thái chưa duy trì đủ lâu, không xử lý
-                            ESP_LOGW(__FUNCTION__, "Door state %d not maintained long enough, ignoring event (elapsed: %d ms)", 
-                                     status, (int)((current_time - door_state_start_time) * 1000 / configTICK_RATE_HZ));
-                        }
+                        // Trạng thái chưa duy trì đủ lâu, không xử lý
+                        ESP_LOGW(__FUNCTION__, "Door state %d not maintained long enough, ignoring event (elapsed: %d ms)", 
+                                 status, (int)((current_time - state_start_time) * 1000 / configTICK_RATE_HZ));
                     }
                 }
                 else
