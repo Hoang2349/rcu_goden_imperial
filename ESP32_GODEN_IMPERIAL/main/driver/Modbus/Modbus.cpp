@@ -238,17 +238,25 @@ bool rs485Reciver()
                 {
                     TickType_t current_time = xTaskGetTickCount();
                     
-                    // Nếu sự kiện cửa giống với sự kiện trước đó và thời gian ngắn hơn ngưỡng debounce
-                    if (status == last_door_status && 
-                        (current_time - last_door_event_time) < DOOR_DEBOUNCE_TIME)
+                    // Luôn cập nhật thời gian sự kiện mới, nhưng chỉ xử lý nếu đủ thời gian debounce
+                    if ((current_time - last_door_event_time) < DOOR_DEBOUNCE_TIME)
                     {
-                        ESP_LOGW(__FUNCTION__, "Door event filtered due to debounce, elapsed: %d ms", 
-                                 (int)((current_time - last_door_event_time) * 1000 / configTICK_RATE_HZ));
-                        // Bỏ qua sự kiện này
+                        // Kiểm tra nếu trạng thái giống với trạng thái trước đó
+                        if (status == last_door_status) {
+                            ESP_LOGW(__FUNCTION__, "Duplicate door event filtered due to debounce, elapsed: %d ms", 
+                                     (int)((current_time - last_door_event_time) * 1000 / configTICK_RATE_HZ));
+                            // Bỏ qua sự kiện này
+                        } else {
+                            // Trạng thái khác với trước đó, nhưng vẫn trong thời gian debounce
+                            // Cập nhật trạng thái mới nhưng không gửi vào queue
+                            last_door_status = status;
+                            ESP_LOGW(__FUNCTION__, "Door state changed but still in debounce period, elapsed: %d ms", 
+                                     (int)((current_time - last_door_event_time) * 1000 / configTICK_RATE_HZ));
+                        }
                     }
                     else
                     {
-                        // Cập nhật thông tin sự kiện mới
+                        // Đã qua đủ thời gian debounce, xử lý sự kiện
                         last_door_status = status;
                         last_door_event_time = current_time;
                         queueInputStm32Push(data);
