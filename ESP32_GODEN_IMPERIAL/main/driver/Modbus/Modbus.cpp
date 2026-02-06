@@ -228,7 +228,7 @@ bool rs485Reciver()
                 // Kiểm tra và xử lý chống nhiễu cho tín hiệu cửa
                 static uint8_t last_door_status = 0xFF; // Giá trị ban đầu không hợp lệ
                 static TickType_t last_door_event_time = 0;
-                static const TickType_t DOOR_DEBOUNCE_TIME = pdMS_TO_TICKS(100); // 100ms debounce time
+                static const TickType_t DOOR_DEBOUNCE_TIME = pdMS_TO_TICKS(500); // 100ms debounce time
                 
                 // Kiểm tra xem có phải là sự kiện cửa không (giả sử pin_active là data[5], status là data[4])
                 uint8_t pin_active = data[5];
