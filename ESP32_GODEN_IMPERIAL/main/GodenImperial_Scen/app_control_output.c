@@ -395,6 +395,10 @@ void handle_event_wc_light(bool new_status)
 {
     set_scene_status(new_status, scene_wc_light_on, scene_wc_light_off);
     status_room_new.wc_light_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.wc_light_status = new_status;
+    
     // Update the MQTT state for WC light
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S1A_WC");
@@ -408,6 +412,10 @@ void handle_event_minibar(bool new_status)
 {
     set_scene_status(new_status, scene_minibar_on, scene_minibar_off);
     status_room_new.minibar_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.minibar_status = new_status;
+    
     // Update the MQTT state for minibar
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S4_MINIBAR");
@@ -421,6 +429,10 @@ void handle_event_reading_s2(bool new_status)
 {
     set_scene_status(new_status, scene_reading_s2_on, scene_reading_s2_off);
     status_room_new.reading_s2_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.reading_s2_status = new_status;
+    
     // Update the MQTT state for reading S2
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S2_READ");
@@ -433,6 +445,10 @@ void handle_event_ceiling_s2(bool new_status)
 {
     set_scene_status(new_status, scene_ceiling_s2_on, scene_ceiling_s2_off);
     status_room_new.ceiling_light_s2_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.ceiling_light_s2_status = new_status;
+    
     // Update the MQTT state for ceiling S2
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S2_CEILING");
@@ -447,6 +463,10 @@ void handle_event_night_s2(bool new_status)
     set_scene_status(new_status, scene_night_light_on, scene_night_light_off);
     status_room_new.night_light_s2_status = new_status;
     status_room_new.night_light_s3_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.night_light_s2_status = new_status;
+    state_setback.status_room.night_light_s3_status = new_status;
 
     // Update the MQTT state for night light S2-NIGHT
     state_in_out_t state_inout = {0};
