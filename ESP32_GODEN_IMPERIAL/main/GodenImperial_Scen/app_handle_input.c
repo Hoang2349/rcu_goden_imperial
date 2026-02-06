@@ -5,53 +5,15 @@
 #include "app_control_output.h"
 #include "app_goden_imperial_common.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
 
 #define TIMEOUT_AFTER_BELL_ACTIVE (3000)  // 3 SECONDS
 
-// Biến debounce cho cảm biến cửa
-typedef struct {
-    bool current_state;
-    bool stable_state;
-    TickType_t last_change_time;
-    bool debounce_active;
-} door_sensor_debounce_t;
-
-static door_sensor_debounce_t door_debounce = {0};
-
 QueueHandle_t queueInputStm32;
 
-/**
- * @brief Ham debounce cho cảm biến cửa
- * @param raw_state Trạng thái thô từ cảm biến
- * @return Trạng thái đã được debounce
- */
-bool process_door_sensor_debounce(bool raw_state) {
-    TickType_t current_time = xTaskGetTickCount();
-    
-    // Nếu trạng thái thay đổi so với trạng thái trước đó
-    if (raw_state != door_debounce.current_state) {
-        door_debounce.current_state = raw_state;
-        door_debounce.last_change_time = current_time;
-        ESP_LOGI(__FUNCTION__, "Raw state changed to: %d", raw_state);
-    }
-    
-    // Kiểm tra nếu trạng thái đã ổn định trong thời gian debounce
-    bool is_stable = (current_time - door_debounce.last_change_time) >= pdMS_TO_TICKS(200);
-    
-    // Nếu trạng thái đã ổn định, cập nhật trạng thái ổn định
-    if (is_stable) {
-        if (door_debounce.stable_state != door_debounce.current_state) {
-            door_debounce.stable_state = door_debounce.current_state;
-            ESP_LOGI(__FUNCTION__, "Stable state updated to: %d", door_debounce.stable_state);
-        }
-    } else {
-        ESP_LOGI(__FUNCTION__, "State still debouncing, stable: %d, elapsed: %d ms", 
-                 door_debounce.stable_state, 
-                 (int)((current_time - door_debounce.last_change_time) * 1000 / configTICK_RATE_HZ));
-    }
-    
-    return door_debounce.stable_state;
-}
+// Biến để theo dõi thời gian khóa cho cảm biến cửa
+static TickType_t last_door_event_time = 0;
+static const TickType_t DOOR_LOCKOUT_TIME = pdMS_TO_TICKS(100); // 100ms lockout time
 
 /**
  * @brief Ham khoi tao queue input tu STM32
@@ -209,26 +171,33 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
         case EVENT_DOOR:
             ESP_LOGI(__FUNCTION__, "Door event triggered with raw status: %d", status);
             
-            // Cập nhật trạng thái debounce
-            bool debounced_status = process_door_sensor_debounce(status);
-            
-            ESP_LOGI(__FUNCTION__, "Debounced status: %d, previous flag_door_sensor: %d", 
-                     debounced_status, status_sensor.flag_door_sensor);
-            
-            // So sánh với trạng thái trước đó để xác định có sự kiện thực sự hay không
-            if (status_sensor.flag_door_sensor != debounced_status) {
-                // Cập nhật trạng thái cảm biến
-                status_sensor.flag_door_sensor = debounced_status;
-                strcpy(state_inout.key, "DOOR");
-                strcpy(state_inout.value, debounced_status ? "false" : "true");
-                push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
-                
-                // Đánh dấu có sự kiện mới
-                status_sensor.new_status_door_sensor = true;
-                ESP_LOGI(__FUNCTION__, "Updated flag_door_sensor to: %d and set new_status_door_sensor to true", debounced_status);
-            } else {
-                ESP_LOGI(__FUNCTION__, "Status unchanged after debounce, not setting new_status_door_sensor");
+            // Kiểm tra thời gian khóa để tránh xử lý các sự kiện quá nhanh
+            TickType_t current_time = xTaskGetTickCount();
+            if ((current_time - last_door_event_time) < DOOR_LOCKOUT_TIME) {
+                ESP_LOGW(__FUNCTION__, "Door event ignored due to lockout time, elapsed: %d ms", 
+                         (int)((current_time - last_door_event_time) * 1000 / configTICK_RATE_HZ));
+                // Bỏ qua sự kiện này bằng cách không thực hiện cập nhật
+                break; // Thoát khỏi case, không cập nhật trạng thái
             }
+            
+            // Cập nhật thời gian sự kiện mới
+            last_door_event_time = current_time;
+            
+            // Cập nhật trạng thái cảm biến ngay lập tức
+            bool new_status = status;
+            
+            ESP_LOGI(__FUNCTION__, "Raw status: %d, previous flag_door_sensor: %d", 
+                     new_status, status_sensor.flag_door_sensor);
+            
+            // Cập nhật trạng thái cảm biến
+            status_sensor.flag_door_sensor = new_status;
+            strcpy(state_inout.key, "DOOR");
+            strcpy(state_inout.value, new_status ? "false" : "true");
+            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+            
+            // Luôn đánh dấu có sự kiện mới khi nhận được tín hiệu từ cảm biến cửa
+            status_sensor.new_status_door_sensor = true;
+            ESP_LOGI(__FUNCTION__, "Updated flag_door_sensor to: %d and set new_status_door_sensor to true", new_status);
             break;
 
         case EVENT_MOTION:
