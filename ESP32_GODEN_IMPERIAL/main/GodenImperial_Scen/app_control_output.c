@@ -319,6 +319,11 @@ void handle_event_master_m1(bool new_status)
     status_room_new.master_m2_status = new_status;
     status_room_new.master_m3_status = new_status;
 
+    // Cập nhật trạng thái setback để đảm bảo các thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.master_m1_status = new_status;
+    state_setback.status_room.master_m2_status = new_status;
+    state_setback.status_room.master_m3_status = new_status;
+
     // Update the MQTT state for master M1
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S1_M1");
@@ -345,6 +350,11 @@ void handle_event_master_m2(bool new_status)
     status_room_new.master_m2_status = new_status;
     status_room_new.master_m3_status = new_status;
 
+    // Cập nhật trạng thái setback để đảm bảo các thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.master_m1_status = new_status;
+    state_setback.status_room.master_m2_status = new_status;
+    state_setback.status_room.master_m3_status = new_status;
+
     // Update the MQTT state for master M2
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S1_M1");
@@ -368,6 +378,10 @@ void handle_event_toilet(bool new_status)
 {
     set_scene_status(new_status, scene_toilet_on, scene_toilet_off);
     status_room_new.toilet_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.toilet_status = new_status;
+    
     // Update the MQTT state for toilet
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S1A_TOILET");
