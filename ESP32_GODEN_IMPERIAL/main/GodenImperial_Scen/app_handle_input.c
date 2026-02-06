@@ -15,11 +15,6 @@ QueueHandle_t queueInputStm32;
 static TickType_t last_door_event_time = 0;
 static const TickType_t DOOR_LOCKOUT_TIME = pdMS_TO_TICKS(100); // 100ms lockout time
 
-// Biến để theo dõi trạng thái ổn định của cửa
-static uint8_t current_stable_door_state = 0xFF; // Trạng thái ổn định hiện tại (không hợp lệ ban đầu)
-static TickType_t door_state_start_time = 0; // Thời gian bắt đầu của trạng thái hiện tại
-static const TickType_t DOOR_STABLE_DURATION = pdMS_TO_TICKS(3000); // 3 seconds minimum duration
-
 
 /**
  * @brief Ham khoi tao queue input tu STM32
@@ -202,46 +197,21 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
             // Cập nhật thời gian sự kiện mới
             last_door_event_time = current_time;
 
-            // Áp dụng cơ chế chống nhiễu tại tầng ứng dụng
-            if (status != current_stable_door_state) {
-                // Trạng thái thay đổi so với trạng thái ổn định đã được xác nhận trước đó
-                // Ghi nhận thời gian bắt đầu cho trạng thái mới
-                door_state_start_time = current_time;
-                ESP_LOGI(__FUNCTION__, "Door state changed from %d to %d, recording start time", 
-                         current_stable_door_state, status);
-            } else {
-                // Trạng thái không thay đổi so với trạng thái trước đó
-                // Kiểm tra xem trạng thái này đã duy trì đủ lâu chưa
-                if ((current_time - door_state_start_time) >= DOOR_STABLE_DURATION) {
-                    // Trạng thái đã duy trì đủ lâu, xác nhận và xử lý sự kiện
-                    current_stable_door_state = status; // Cập nhật trạng thái ổn định
-                    ESP_LOGI(__FUNCTION__, "Door state %d confirmed as stable after %d ms, processing event", 
-                             status, (int)(DOOR_STABLE_DURATION * 1000 / configTICK_RATE_HZ));
-                    
-                    // Cập nhật trạng thái cảm biến
-                    bool new_status = status;
+            // Cập nhật trạng thái cảm biến ngay lập tức
+            bool new_status = status;
 
-                    ESP_LOGI(__FUNCTION__, "Processing door event - Raw status: %d, previous flag_door_sensor: %d",
-                             new_status, status_sensor.flag_door_sensor);
+            ESP_LOGI(__FUNCTION__, "Raw status: %d, previous flag_door_sensor: %d",
+                     new_status, status_sensor.flag_door_sensor);
 
-                    // Cập nhật trạng thái cảm biến
-                    status_sensor.flag_door_sensor = new_status;
-                    strcpy(state_inout.key, "DOOR");
-                    strcpy(state_inout.value, new_status ? "false" : "true");
-                    push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
+            // Cập nhật trạng thái cảm biến
+            status_sensor.flag_door_sensor = new_status;
+            strcpy(state_inout.key, "DOOR");
+            strcpy(state_inout.value, new_status ? "false" : "true");
+            push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
 
-                    // Đánh dấu có sự kiện mới
-                    status_sensor.new_status_door_sensor = true;
-                    ESP_LOGI(__FUNCTION__, "Updated flag_door_sensor to: %d and set new_status_door_sensor to true", new_status);
-                    
-                    // Cập nhật lại thời gian bắt đầu để xử lý các sự kiện tiếp theo
-                    door_state_start_time = current_time;
-                } else {
-                    // Trạng thái chưa duy trì đủ lâu, không xử lý
-                    ESP_LOGW(__FUNCTION__, "Door state %d not maintained long enough, ignoring event (elapsed: %d ms)", 
-                             status, (int)((current_time - door_state_start_time) * 1000 / configTICK_RATE_HZ));
-                }
-            }
+            // Luôn đánh dấu có sự kiện mới khi nhận được tín hiệu từ cảm biến cửa
+            status_sensor.new_status_door_sensor = true;
+            ESP_LOGI(__FUNCTION__, "Updated flag_door_sensor to: %d and set new_status_door_sensor to true", new_status);
             break;
 
         case EVENT_MOTION:
