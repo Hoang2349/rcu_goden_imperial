@@ -203,23 +203,25 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
             last_door_event_time = current_time;
 
             // Áp dụng cơ chế chống nhiễu tại tầng ứng dụng
-            // Chỉ xử lý sự kiện nếu trạng thái đã duy trì đủ lâu
             if (status != current_stable_door_state) {
-                // Trạng thái thay đổi, ghi nhận thời gian bắt đầu cho trạng thái mới
-                current_stable_door_state = status;
+                // Trạng thái thay đổi so với trạng thái ổn định đã được xác nhận trước đó
+                // Ghi nhận thời gian bắt đầu cho trạng thái mới
                 door_state_start_time = current_time;
-
-                ESP_LOGI(__FUNCTION__, "Door state changed to %d, recording start time", status);
+                ESP_LOGI(__FUNCTION__, "Door state changed from %d to %d, recording start time", 
+                         current_stable_door_state, status);
             } else {
-                // Trạng thái không thay đổi, kiểm tra thời gian duy trì
+                // Trạng thái không thay đổi so với trạng thái trước đó
+                // Kiểm tra xem trạng thái này đã duy trì đủ lâu chưa
                 if ((current_time - door_state_start_time) >= DOOR_STABLE_DURATION) {
-                    // Trạng thái hiện tại đã duy trì đủ lâu, xử lý sự kiện
-                    ESP_LOGI(__FUNCTION__, "Door state %d maintained for required duration, processing event", status);
+                    // Trạng thái đã duy trì đủ lâu, xác nhận và xử lý sự kiện
+                    current_stable_door_state = status; // Cập nhật trạng thái ổn định
+                    ESP_LOGI(__FUNCTION__, "Door state %d confirmed as stable after %d ms, processing event", 
+                             status, (int)(DOOR_STABLE_DURATION * 1000 / configTICK_RATE_HZ));
                     
                     // Cập nhật trạng thái cảm biến
                     bool new_status = status;
 
-                    ESP_LOGI(__FUNCTION__, "Raw status: %d, previous flag_door_sensor: %d",
+                    ESP_LOGI(__FUNCTION__, "Processing door event - Raw status: %d, previous flag_door_sensor: %d",
                              new_status, status_sensor.flag_door_sensor);
 
                     // Cập nhật trạng thái cảm biến
@@ -232,7 +234,7 @@ void check_active_scen(uint8_t pin_active, uint8_t status)
                     status_sensor.new_status_door_sensor = true;
                     ESP_LOGI(__FUNCTION__, "Updated flag_door_sensor to: %d and set new_status_door_sensor to true", new_status);
                     
-                    // Cập nhật lại thời gian bắt đầu để tránh xử lý lặp lại
+                    // Cập nhật lại thời gian bắt đầu để xử lý các sự kiện tiếp theo
                     door_state_start_time = current_time;
                 } else {
                     // Trạng thái chưa duy trì đủ lâu, không xử lý
