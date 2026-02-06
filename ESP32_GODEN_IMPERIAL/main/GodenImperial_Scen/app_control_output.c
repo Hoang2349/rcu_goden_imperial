@@ -487,6 +487,10 @@ void handle_event_night_s3(bool new_status)
     set_scene_status(new_status, scene_night_light_on, scene_night_light_off);
     status_room_new.night_light_s3_status = new_status;
     status_room_new.night_light_s2_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.night_light_s3_status = new_status;
+    state_setback.status_room.night_light_s2_status = new_status;
 
     // Update the MQTT state for night light S2-NIGHT
     state_in_out_t state_inout = {0};
@@ -508,6 +512,12 @@ void handle_event_master_m3(bool new_status)
     status_room_new.master_m3_status = new_status;
     status_room_new.master_m2_status = new_status;
     status_room_new.master_m1_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.master_m3_status = new_status;
+    state_setback.status_room.master_m2_status = new_status;
+    state_setback.status_room.master_m1_status = new_status;
+    
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S1_M1");
     strcpy(state_inout.value, new_status ? "true" : "false");
@@ -530,6 +540,10 @@ void handle_event_ceiling_s3(bool new_status)
 {
     set_scene_status(new_status, scene_ceiling_s3_on, scene_ceiling_s3_off);
     status_room_new.ceiling_light_s3_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.ceiling_light_s3_status = new_status;
+    
     // Update the MQTT state for ceiling S3
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S3_CEILING");
@@ -542,6 +556,9 @@ void handle_event_reading_s3(bool new_status)
 {
     set_scene_status(new_status, scene_reading_s3_on, scene_reading_s3_off);
     status_room_new.reading_s3_status = new_status;
+    
+    // Cập nhật trạng thái setback để đảm bảo thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
+    state_setback.status_room.reading_s3_status = new_status;
 
     // Update the MQTT state for reading S3
     state_in_out_t state_inout = {0};
