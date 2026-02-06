@@ -157,7 +157,7 @@ void init_goden_imperial_input()
 void check_active_scen(uint8_t pin_active, uint8_t status)
 {
     ESP_LOGW(__FUNCTION__, "Pin active: %d", pin_active);
-    bool new_status = false;
+
     state_in_out_t state_inout = {0};
     switch (pin_active)
     {

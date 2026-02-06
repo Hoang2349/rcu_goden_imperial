@@ -21,7 +21,6 @@ status_room_t status_room_new = {false};
 bool flag_syn_status_room = false;
 pms_room_status_t pms_room_status;
 status_sensor_t status_sensor;
-state_setback_t state_setback;
 status_outdoor_t status_outdoor = {false};
 
 uint32_t time_crossing = DEFAULT_TIME_CROSSING;
@@ -53,8 +52,6 @@ void syn_status_room(void *param)
         {
             flag_syn_status_room = false;
             ESP_LOGI(__FUNCTION__, "Status room changed, updating...");
-            handle_led_status();
-            update_setback_status_room();
         }
 
         vTaskDelay(pdMS_TO_TICKS(100));  // Delay 1 giây
@@ -218,38 +215,6 @@ void init_goden_imperial()
     // init sensor state
     status_sensor.flag_door_sensor = DOOR_CLOSE;
     status_sensor.flag_motion_sensor = INACTIVE;
-
-    // INIT STATE SETBACK
-    for (int i = 0; i < MAX_RELAY_CONTROL; i++)
-    {
-        state_setback.relay[i].index = RELAY_C1 + i;
-        state_setback.relay[i].value = 0X00;
-    }
-
-    state_setback.led[0].index = LED_MASTER_M1;
-    state_setback.led[0].value = 0X00;
-    state_setback.led[1].index = LED_MASTER_M2;
-    state_setback.led[1].value = 0X00;
-    state_setback.led[2].index = LED_MASTER_M3;
-    state_setback.led[2].value = 0X00;
-    state_setback.led[3].index = LED_TOILET;
-    state_setback.led[3].value = 0X00;
-    state_setback.led[4].index = LED_BATHROOM;
-    state_setback.led[4].value = 0X00;
-    state_setback.led[5].index = LED_MINIBAR;
-    state_setback.led[5].value = 0X00;
-    state_setback.led[6].index = LED_SPORT_LIGHT;
-    state_setback.led[6].value = 0X00;
-    state_setback.led[7].index = LED_DECORATION_S2;
-    state_setback.led[7].value = 0X00;
-    state_setback.led[8].index = LED_DECORATION_S3;
-    state_setback.led[8].value = 0X00;
-    state_setback.led[9].index = LED_COVER_LIGHT;
-    state_setback.led[9].value = 0X00;
-    state_setback.led[10].index = LED_READING_S2;
-    state_setback.led[10].value = 0X00;
-    state_setback.led[11].index = LED_READING_S3;
-    state_setback.led[11].value = 0X00;
     init_goden_imperial_input();
     app_nvs_config_t config_data = {0};
     if (goden_inperial_read_config_data(&config_data) == ESP_OK)

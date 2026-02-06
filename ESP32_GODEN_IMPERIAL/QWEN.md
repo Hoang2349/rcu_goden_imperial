@@ -79,7 +79,6 @@ The system maintains several important state structures:
 - `status_room_t` - Current room device status (lights, minibar, etc.)
 - `pms_room_status_t` - Room booking and occupancy status
 - `status_sensor_t` - Sensor inputs (door, motion)
-- `state_setback_t` - Energy-saving automation states
 
 ## Testing and Debugging
 

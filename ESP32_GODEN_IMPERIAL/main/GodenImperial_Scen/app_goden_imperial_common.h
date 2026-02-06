@@ -6,7 +6,7 @@
 
 
 
-#define MAX_RELAY_CONTROL 14
+#define MAX_RELAY_CONTROL 12
 #define MAX_LED_CONTROL 12
 typedef struct status_room
 {
@@ -62,12 +62,6 @@ typedef struct
     uint8_t index;   
     uint8_t value;  
 } output_state_t;
-typedef struct
-{
-    output_state_t relay[MAX_RELAY_CONTROL];
-    output_state_t led[MAX_LED_CONTROL];
-    status_room_t status_room;
-} state_setback_t;
 
 enum ROOM_STATUS
 {
@@ -102,7 +96,6 @@ extern status_room_t status_room_new;
 extern bool flag_syn_status_room;
 extern pms_room_status_t pms_room_status;
 extern status_sensor_t status_sensor;
-extern state_setback_t state_setback;
 extern status_outdoor_t status_outdoor;
 extern uint32_t time_crossing_set;
 extern double time_door_ajar;

@@ -94,18 +94,12 @@ void handle_scene_staff_mode();
 void handle_scene_welcome();
 void handle_scene_standby();
 void handle_scene_occupied();
-void handle_scene_setback();
-
-void handle_led_status();
-void update_setback_status_relay(uint8_t index, uint8_t value);
-void update_setback_status_led(uint8_t index, uint8_t value);
-void update_setback_status_room();
-void update_all_setback_relays_from_current_states();
 
 void scene_bell();
 void scene_dnd(bool status);
 void scene_mur(bool status);
 
 void push_state_inout_mqtt(int index, bool value);
+
 
 #endif //  __APP_CONTROL_RELAY_H__
