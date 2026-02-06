@@ -316,31 +316,13 @@ void handle_event_master_m1(bool new_status)
     // bool new_status = !status_room_cur.master_m1_status;
     set_scene_status(new_status, scene_master_m1_on, scene_master_m1_off);
     status_room_new.master_m1_status = new_status;
-    status_room_new.toilet_status = new_status;
-    status_room_new.wc_light_status = new_status;
-    status_room_new.minibar_status = new_status;
     status_room_new.master_m2_status = new_status;
-    status_room_new.reading_s2_status = new_status;
-    status_room_new.ceiling_light_s2_status = new_status;
-    status_room_new.night_light_s2_status = new_status;
-    status_room_new.night_light_s3_status = new_status;
     status_room_new.master_m3_status = new_status;
-    status_room_new.ceiling_light_s3_status = new_status;
-    status_room_new.reading_s3_status = new_status;
 
     // Cập nhật trạng thái setback để đảm bảo các thiết bị được khôi phục đúng khi chuyển từ standby sang occupied
     state_setback.status_room.master_m1_status = new_status;
-    state_setback.status_room.toilet_status = new_status;
-    state_setback.status_room.wc_light_status = new_status;
-    state_setback.status_room.minibar_status = new_status;
     state_setback.status_room.master_m2_status = new_status;
-    state_setback.status_room.reading_s2_status = new_status;
-    state_setback.status_room.ceiling_light_s2_status = new_status;
-    state_setback.status_room.night_light_s2_status = new_status;
-    state_setback.status_room.night_light_s3_status = new_status;
     state_setback.status_room.master_m3_status = new_status;
-    state_setback.status_room.ceiling_light_s3_status = new_status;
-    state_setback.status_room.reading_s3_status = new_status;
 
     // Update the MQTT state for master M1
     state_in_out_t state_inout = {0};
@@ -699,6 +681,8 @@ void handle_scene_welcome()
 
 void handle_scene_standby()
 {
+    update_setback_status_room();
+    
     scene_off_all();
     scene_itc_off();
     scene_idu_off();
@@ -758,21 +742,6 @@ void handle_scene_setback()
         state_setback.status_room.ceiling_light_s3_status;
     status_room_new.reading_s3_status =
         state_setback.status_room.reading_s3_status;
-    
-    // Cập nhật trực tiếp status_room_cur để đảm bảo trạng thái được đồng bộ ngay lập tức
-    status_room_cur.master_m1_status = status_room_new.master_m1_status;
-    status_room_cur.toilet_status = status_room_new.toilet_status;
-    status_room_cur.wc_light_status = status_room_new.wc_light_status;
-    status_room_cur.minibar_status = status_room_new.minibar_status;
-    status_room_cur.master_m2_status = status_room_new.master_m2_status;
-    status_room_cur.reading_s2_status = status_room_new.reading_s2_status;
-    status_room_cur.ceiling_light_s2_status = status_room_new.ceiling_light_s2_status;
-    status_room_cur.night_light_s2_status = status_room_new.night_light_s2_status;
-    status_room_cur.night_light_s3_status = status_room_new.night_light_s3_status;
-    status_room_cur.master_m3_status = status_room_new.master_m3_status;
-    status_room_cur.ceiling_light_s3_status = status_room_new.ceiling_light_s3_status;
-    status_room_cur.reading_s3_status = status_room_new.reading_s3_status;
-    
     flag_syn_status_room = true;
 }
 //===============led indicate===================//
@@ -812,42 +781,65 @@ void handle_led_status()
 // handle upadte status setback
 void update_setback_status_relay(uint8_t index, uint8_t value)
 {
+    ESP_LOGD(__FUNCTION__, "Updating relay %d status to %d, current human status: %s", 
+             index, value, pms_room_status.status_human == OCCUPIED ? "OCCUPIED" : "UNOCCUPIED");
+    
     if ((pms_room_status.status_human == OCCUPIED))
     {
         for (int i = 0; i < MAX_RELAY_CONTROL; i++)
         {
             if (state_setback.relay[i].index == index)
             {
+                uint8_t old_value = state_setback.relay[i].value;
                 state_setback.relay[i].value = value;
-                ESP_LOGI(__FUNCTION__, "Relay %d status updated to %d", index,
-                         value);
+                ESP_LOGI(__FUNCTION__, "Relay %d status updated from %d to %d", 
+                         index, old_value, value);
                 break;
             }
         }
+    }
+    else
+    {
+        ESP_LOGW(__FUNCTION__, "Not updating relay %d, room is not occupied (status_human: %s)", 
+                 index, pms_room_status.status_human ? "OCCUPIED" : "UNOCCUPIED");
     }
 }
 
 void update_setback_status_led(uint8_t index, uint8_t value)
 {
+    ESP_LOGD(__FUNCTION__, "Updating LED %d status to %d, current human status: %s", 
+             index, value, pms_room_status.status_human == OCCUPIED ? "OCCUPIED" : "UNOCCUPIED");
+    
     if ((pms_room_status.status_human == OCCUPIED))
     {
         for (int i = 0; i < MAX_LED_CONTROL; i++)
         {
             if (state_setback.led[i].index == index)
             {
+                uint8_t old_value = state_setback.led[i].value;
                 state_setback.led[i].value = value;
-                ESP_LOGI(__FUNCTION__, "LED %d status updated to %d", index,
-                         value);
+                ESP_LOGI(__FUNCTION__, "LED %d status updated from %d to %d", 
+                         index, old_value, value);
                 break;
             }
         }
+    }
+    else
+    {
+        ESP_LOGW(__FUNCTION__, "Not updating LED %d, room is not occupied (status_human: %s)", 
+                 index, pms_room_status.status_human ? "OCCUPIED" : "UNOCCUPIED");
     }
 }
 
 void update_setback_status_room()
 {
+    ESP_LOGD(__FUNCTION__, "Updating setback status room, current human status: %s", 
+             pms_room_status.status_human == OCCUPIED ? "OCCUPIED" : "UNOCCUPIED");
+    
     if ((pms_room_status.status_human == OCCUPIED))
     {
+        ESP_LOGI(__FUNCTION__, "Updating all device states in setback configuration");
+        
         state_setback.status_room.master_m1_status =
             status_room_cur.master_m1_status;
         state_setback.status_room.toilet_status = status_room_cur.toilet_status;
@@ -871,6 +863,13 @@ void update_setback_status_room()
             status_room_cur.ceiling_light_s3_status;
         state_setback.status_room.reading_s3_status =
             status_room_cur.reading_s3_status;
+        
+        ESP_LOGI(__FUNCTION__, "Setback status room updated successfully");
+    }
+    else
+    {
+        ESP_LOGW(__FUNCTION__, "Not updating setback status room, room is not occupied (status_human: %s)", 
+                 pms_room_status.status_human ? "OCCUPIED" : "UNOCCUPIED");
     }
 }
 
