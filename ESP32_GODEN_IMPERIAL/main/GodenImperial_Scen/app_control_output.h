@@ -7,7 +7,7 @@
 #define MAX_DATA_SIZE 16
 enum RelayIndex
 {
-    RELAY_BELL = 0x0F,
+    RELAY_IDU = 0x0F,
     RELAY_C1 = 0x0E,
     RELAY_C2 = 0x0D,
     RELAY_C3 = 0x0C,
@@ -21,7 +21,7 @@ enum RelayIndex
     RELAY_C11 = 0x04,
     RELAY_C12 = 0x03,
     RELAY_ICT = 0x02,
-    RELAY_IDU = 0x01,
+    RELAY_BELL = 0x01,
 };
 
 enum Ledindex

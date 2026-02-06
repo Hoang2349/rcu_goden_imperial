@@ -594,6 +594,9 @@ void handle_scene_unrented()
         create_json_dynamic("SET_BACK_ACTIVE", "false", TYPE_STRING);
     publish_data_mqtt(json_string2);
 
+    // Đặt lại flag_checkin_first để chuẩn bị cho lần check-in tiếp theo
+    pms_room_status.flag_checkin_first = true;
+
     free(json_string);
     free(json_string1);
     free(json_string2);
@@ -619,7 +622,7 @@ void handle_scene_welcome()
     scene_dnd(false);
     scene_mur(false);
     char *json_string =
-        create_json_dynamic("ROOM_STATUS", "WELCOME", TYPE_STRING);
+        create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
     publish_data_mqtt(json_string);
     ESP_LOGI(__FUNCTION__, "Welcome scene activated.");
     free(json_string);

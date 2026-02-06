@@ -73,7 +73,7 @@ void rule_room_hotel()
             if (status_sensor.flag_door_sensor == DOOR_CLOSE &&
                 flag_staff_mode == ACTIVE)
             {
-                vTaskDelay(pdMS_TO_TICKS(5000));
+                vTaskDelay(pdMS_TO_TICKS(30000));
                 handle_scene_unrented();
                 flag_staff_mode = INACTIVE;
                 continue;
@@ -114,12 +114,16 @@ void rule_room_hotel()
                         "WELCOME_STATUS", "true", TYPE_STRING);
                     publish_data_mqtt(json_string);
 
-                    char *json_string1 =
-                        create_json_dynamic("ROOM_STATUS", "UNOCC", TYPE_STRING);
-                    publish_data_mqtt(json_string1);
-                    free(json_string1);
                     free(json_string);
                     ESP_LOGW("Welcome check", "Guest checked in first time.");
+                }
+                else
+                {
+                    // Nếu không phải lần đầu tiên và đang ở trạng thái standby (UNOCCUPIED)
+                    if (pms_room_status.status_human == UNOCCUPIED)
+                    {
+                        handle_scene_setback();  // Áp dụng lại trạng thái setback
+                    }
                 }
                 continue;
             }

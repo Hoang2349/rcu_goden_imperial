@@ -415,13 +415,18 @@ void handle_data_mqtt_set(sMqttPkg_t *mqttPkg)
                      timeoutUnoccupied->valuedouble);
             char *json_string = create_json_dynamic(
                 "UNOCC_DELAY", &timeoutUnoccupied->valuedouble, TYPE_DOUBLE);
-            if (pms_room_status.status_room == ROOM_UNRENT)
+            uint32_t new_timeout = (uint32_t)timeoutUnoccupied->valuedouble;
+            if (new_timeout != time_crossing_set)
             {
-                time_crossing_set = (uint32_t)timeoutUnoccupied->valuedouble;
+                time_crossing_set = new_timeout;
                 printf("TIMEOUT UNOCCUPIED: %ld\n", time_crossing_set);
                 app_nvs_config_t config_data = {time_crossing_set,
                                                 time_door_ajar};
                 goden_inperial_write_config_data(&config_data);
+            }
+            else
+            {
+                printf("Giá trị timeout không thay đổi, không cần lưu vào NVS\n");
             }
 
             esp_mqtt_client_publish(client, TOPIC_DEVICE_TELEMETRY, json_string,
