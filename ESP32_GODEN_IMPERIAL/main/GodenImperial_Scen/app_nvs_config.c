@@ -14,25 +14,25 @@ const static char *TAG = "NVS_ESP32";
 
 int goden_imperial_nvs_init()
 {
-    // int ret = nvs_flash_init();
-    // if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-    // {
-    //     ESP_LOGE(TAG, "failed to initialize nvs flash, error code: %d, trying to erase flash and re-try to initialize ",
-    //              ret);
-    //     ret = nvs_flash_erase();
-    //     if (ret != ESP_OK)
-    //     {
-    //         ESP_LOGE(TAG, "failed to erase nvs flash, error code: %d ", ret);
-    //         return ret;
-    //     }
-    //     ret = nvs_flash_init();
-    // }
-    // if (ret != ESP_OK)
-    // {
-    //     ESP_LOGE(TAG, "failed to initialize nvs flash, error code: %d ", ret);
-    //     return ret;
-    // }
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        ESP_LOGW(TAG, "NVS init failed, erasing NVS partition and retrying...");
+        ret = nvs_flash_erase();
+        if (ret != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Failed to erase NVS flash, error code: %d", ret);
+            return ret;
+        }
+        ret = nvs_flash_init();
+    }
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to initialize NVS flash, error code: %d", ret);
+        return ret;
+    }
 
+    ESP_LOGI(TAG, "NVS initialized successfully");
     return ESP_OK;
 }
 

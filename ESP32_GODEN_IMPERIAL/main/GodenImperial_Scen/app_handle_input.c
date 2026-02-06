@@ -19,7 +19,7 @@ static const TickType_t DOOR_LOCKOUT_TIME = pdMS_TO_TICKS(100); // 100ms lockout
 static bool door_hold_active = false;
 static bool held_door_state = false;
 static TickType_t door_hold_start_time = 0;
-static const TickType_t DOOR_HOLD_DURATION = pdMS_TO_TICKS(5000); // 5 seconds door hold duration
+static const TickType_t DOOR_HOLD_DURATION = pdMS_TO_TICKS(30000); // 10 seconds door hold duration
 
 /**
  * @brief Ham khoi tao queue input tu STM32
@@ -134,8 +134,20 @@ void hanlde_mode_outdoor(void *param)
     }
 }
 
+#include "app_nvs_config.h"
+
 void init_goden_imperial_input()
 {
+    // Khởi tạo NVS trước khi sử dụng
+    if (goden_imperial_nvs_init() != ESP_OK)
+    {
+        ESP_LOGE(__FUNCTION__, "Failed to initialize NVS");
+    }
+    else
+    {
+        ESP_LOGI(__FUNCTION__, "NVS initialized successfully");
+    }
+    
     queueInputStm32Init();
     xTaskCreate(process_handle_input,       // Task function
                 "Task handle input STm32",  // Tên task
