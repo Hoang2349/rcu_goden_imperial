@@ -15,9 +15,17 @@
 #include "otaStm32.h"
 
 #include "app_main_goden.h"
+#include "app_nvs_config.h"
+
 void app_main(void)
 {
     espSystemInit();
+    
+    // Khởi tạo NVS cho Golden Imperial trước khi các module khác sử dụng
+    if (goden_imperial_nvs_init() != ESP_OK) {
+        printf("Failed to initialize Golden Imperial NVS\n");
+    }
+    
     appWifiApInit();
     appSpiffsInit();
     appEthernetInit();

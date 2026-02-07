@@ -133,16 +133,9 @@ void hanlde_mode_outdoor(void *param)
 
 void init_goden_imperial_input()
 {
-    // Khởi tạo NVS trước khi sử dụng
-    if (goden_imperial_nvs_init() != ESP_OK)
-    {
-        ESP_LOGE(__FUNCTION__, "Failed to initialize NVS");
-    }
-    else
-    {
-        ESP_LOGI(__FUNCTION__, "NVS initialized successfully");
-    }
-    
+    // NVS đã được khởi tạo ở main nên không cần khởi tạo lại ở đây
+    // Chỉ cần kiểm tra nếu cần thiết
+
     queueInputStm32Init();
     xTaskCreate(process_handle_input,       // Task function
                 "Task handle input STm32",  // Tên task
