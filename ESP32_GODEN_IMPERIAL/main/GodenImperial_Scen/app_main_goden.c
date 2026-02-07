@@ -5,7 +5,9 @@
 #include "app_goden_imperial_common.h"
 #include "app_handle_input.h"
 #include "app_state_persistence.h"
+#include "app_advanced_state_management.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
@@ -62,6 +64,11 @@ void syn_status_room(void *param)
             if (ret != ESP_OK) {
                 ESP_LOGE(__FUNCTION__, "Failed to save state to RAM: %s", esp_err_to_name(ret));
             }
+            
+            // Also update the OCC state if we're currently in OCCUPIED state
+            if (pms_room_status.status_human == OCCUPIED) {
+                save_occ_initial_state();
+            }
         }
 
         // Periodically save the state even if there are no changes
@@ -71,6 +78,11 @@ void syn_status_room(void *param)
             esp_err_t ret = save_current_state_to_ram();
             if (ret != ESP_OK) {
                 ESP_LOGE(__FUNCTION__, "Periodic save failed: %s", esp_err_to_name(ret));
+            }
+            
+            // Also periodically update the OCC state if we're currently in OCCUPIED state
+            if (pms_room_status.status_human == OCCUPIED) {
+                save_occ_initial_state();
             }
         }
 
@@ -167,6 +179,12 @@ void rule_room_hotel()
                 }
                 temp = false;
                 time_crossing = time_crossing_set;
+                
+                // Lưu trạng thái hiện tại trước khi chuyển sang standby
+                if (pms_room_status.status_human == OCCUPIED) {
+                    save_occ_initial_state();
+                }
+                
                 handle_scene_standby();
             }
 
@@ -181,8 +199,29 @@ void rule_room_hotel()
                     status_sensor.flag_motion_sensor = false;
                     check_mode = false;
                     time_crossing = time_crossing_set;
-                    handle_scene_occupied();
-                    ESP_LOGW(__FUNCTION__, ">>> OCCUPIED");
+                    
+                    // Nếu đã có trạng thái OCC được lưu, khôi phục lại
+                    if (is_occ_state_saved()) {
+                        restore_occ_initial_state();
+                        // Vẫn cần thực hiện các hành động cần thiết như trong handle_scene_occupied()
+                        scene_itc_on();
+                        scene_idu_on();
+                        char *json_string = create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
+                        publish_data_mqtt(json_string);
+                        char *json_string1 =
+                            create_json_dynamic("SET_BACK_ACTIVE", "false", TYPE_STRING);
+                        publish_data_mqtt(json_string1);
+                        free(json_string);
+                        free(json_string1);
+                        
+                        // Cập nhật trạng thái đồng bộ
+                        flag_syn_status_room = true;
+                        
+                        ESP_LOGW(__FUNCTION__, ">>> OCCUPIED - Restored from saved state");
+                    } else {
+                        handle_scene_occupied();
+                        ESP_LOGW(__FUNCTION__, ">>> OCCUPIED - Fresh occupied state");
+                    }
                     continue;
                 }
 
@@ -192,6 +231,10 @@ void rule_room_hotel()
                     status_sensor.flag_motion_sensor = false;
                     check_mode = false;
                     time_crossing = time_crossing_set;
+                    
+                    // Nếu trạng thái OCC đã được lưu và có chuyển động, 
+                    // có thể muốn cập nhật lại trạng thái nếu cần
+                    // (tùy chọn, có thể bỏ qua nếu không cần thiết)
                 }
 
                 if (pms_room_status.status_human == OCCUPIED && check_mode)
@@ -206,6 +249,11 @@ void rule_room_hotel()
             // Handle unoccupied state
             if (!time_crossing)
             {
+                // Lưu trạng thái hiện tại nếu đang ở trạng thái OCCUPIED trước khi chuyển sang standby
+                if (pms_room_status.status_human == OCCUPIED) {
+                    save_occ_initial_state();
+                }
+                
                 pms_room_status.status_human = UNOCCUPIED;
                 status_sensor.flag_motion_sensor = false;
                 check_mode = false;
@@ -240,6 +288,9 @@ void init_goden_imperial()
         status_sensor.flag_door_sensor = DOOR_CLOSE;
         status_sensor.flag_motion_sensor = INACTIVE;
     }
+    
+    // Clear any saved OCC state at initialization
+    clear_saved_occ_state();
     
     init_goden_imperial_input();
     app_nvs_config_t config_data = {0};

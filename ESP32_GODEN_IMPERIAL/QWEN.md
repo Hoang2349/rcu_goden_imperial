@@ -253,6 +253,25 @@ The system implements a RAM-based state persistence mechanism that captures and 
 - Fast access and minimal memory footprint
 - Efficient state management during runtime
 
+### Advanced State Management
+The system implements advanced state management to handle complex state transitions:
+
+#### State Preservation During Standby Transition
+- When room transitions from `OCCUPIED` to `STANDBY` (due to timeout without motion), the current state is preserved
+- The preserved state includes all relay states, sensor states, outdoor indicators, and PMS states
+- This ensures that when the room returns to `OCCUPIED` state, the original configuration can be restored
+
+#### State Restoration When Returning to Occupied
+- When motion is detected after the room has transitioned to `STANDBY`, the system returns to `OCCUPIED` state
+- The system restores the exact state that was present when the room was initially in `OCCUPIED` state
+- This preserves all switch positions, light settings, and other device states as they were before the standby transition
+- Additionally, the system executes necessary actions like turning on ITC/IDU and sending appropriate MQTT messages
+
+#### Implementation Details
+- Uses `save_occ_initial_state()` to preserve state when transitioning to standby
+- Uses `restore_occ_initial_state()` to restore state when returning to occupied
+- The saved state is kept in RAM and cleared when appropriate (e.g., at initialization or when transitioning to other states)
+
 ## Project Dependencies and Build System
 
 The project uses ESP-IDF build system with the following components:

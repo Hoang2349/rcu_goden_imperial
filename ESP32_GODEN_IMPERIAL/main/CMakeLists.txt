@@ -42,6 +42,7 @@ idf_component_register(
 			GodenImperial_Scen/app_handle_input.c
 			GodenImperial_Scen/app_nvs_config.c
 			GodenImperial_Scen/app_state_persistence.c
+			GodenImperial_Scen/app_advanced_state_management.c
 
     INCLUDE_DIRS  	driver 
 					driver/Sparkplug    					 # optional, add here public include directories

@@ -101,5 +101,7 @@ void scene_mur(bool status);
 
 void push_state_inout_mqtt(int index, bool value);
 
+void update_outputs_to_match_state(void);
+
 
 #endif //  __APP_CONTROL_RELAY_H__

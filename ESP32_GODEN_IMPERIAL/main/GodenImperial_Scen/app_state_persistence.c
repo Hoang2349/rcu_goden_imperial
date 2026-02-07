@@ -7,16 +7,6 @@
 
 #define TAG "STATE_PERSISTENCE"
 
-// Define the structure to store all relay states in RAM
-typedef struct {
-    status_room_t relay_states;
-    status_sensor_t sensor_states;
-    status_outdoor_t outdoor_states;
-    pms_room_status_t pms_states;
-    uint32_t timestamp;  // Unix timestamp when state was saved
-    uint8_t valid;       // Flag to indicate if the stored data is valid
-} persisted_state_t;
-
 // Static variable to hold the state in RAM
 static persisted_state_t g_stored_state = {0};
 
@@ -178,4 +168,40 @@ esp_err_t init_state_persistence(void)
     
     ESP_LOGI(TAG, "RAM-based state persistence system initialized");
     return ESP_OK;
+}
+
+/**
+ * @brief Get the current room status
+ * @return Pointer to the current status_room_t structure
+ */
+status_room_t* get_current_room_status(void)
+{
+    return &status_room_cur;
+}
+
+/**
+ * @brief Get the current sensor status
+ * @return Pointer to the current status_sensor_t structure
+ */
+status_sensor_t* get_current_sensor_status(void)
+{
+    return &status_sensor;
+}
+
+/**
+ * @brief Get the current outdoor status
+ * @return Pointer to the current status_outdoor_t structure
+ */
+status_outdoor_t* get_current_outdoor_status(void)
+{
+    return &status_outdoor;
+}
+
+/**
+ * @brief Get the current PMS status
+ * @return Pointer to the current pms_room_status_t structure
+ */
+pms_room_status_t* get_current_pms_status(void)
+{
+    return &pms_room_status;
 }

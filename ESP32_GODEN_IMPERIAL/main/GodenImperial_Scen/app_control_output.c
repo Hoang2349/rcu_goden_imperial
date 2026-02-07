@@ -320,6 +320,9 @@ void handle_event_master_m1(bool new_status)
     status_room_new.master_m1_status = new_status;
     status_room_new.master_m2_status = new_status;
     status_room_new.master_m3_status = new_status;
+    status_room_cur.master_m1_status = new_status;  // Update current status immediately
+    status_room_cur.master_m2_status = new_status;  // Update current status immediately
+    status_room_cur.master_m3_status = new_status;  // Update current status immediately
     // Update the MQTT state for master M1
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S1_M1");
@@ -345,6 +348,9 @@ void handle_event_master_m2(bool new_status)
     status_room_new.master_m1_status = new_status;
     status_room_new.master_m2_status = new_status;
     status_room_new.master_m3_status = new_status;
+    status_room_cur.master_m1_status = new_status;  // Update current status immediately
+    status_room_cur.master_m2_status = new_status;  // Update current status immediately
+    status_room_cur.master_m3_status = new_status;  // Update current status immediately
 
 
     // Update the MQTT state for master M2
@@ -370,7 +376,8 @@ void handle_event_toilet(bool new_status)
 {
     set_scene_status(new_status, scene_toilet_on, scene_toilet_off);
     status_room_new.toilet_status = new_status;
-    
+    status_room_cur.toilet_status = new_status;  // Update current status immediately
+
     // Update the MQTT state for toilet
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S1A_TOILET");
@@ -384,6 +391,7 @@ void handle_event_wc_light(bool new_status)
 {
     set_scene_status(new_status, scene_wc_light_on, scene_wc_light_off);
     status_room_new.wc_light_status = new_status;
+    status_room_cur.wc_light_status = new_status;  // Update current status immediately
     
     // Update the MQTT state for WC light
     state_in_out_t state_inout = {0};
@@ -398,6 +406,7 @@ void handle_event_minibar(bool new_status)
 {
     set_scene_status(new_status, scene_minibar_on, scene_minibar_off);
     status_room_new.minibar_status = new_status;
+    status_room_cur.minibar_status = new_status;  // Update current status immediately
     
     // Update the MQTT state for minibar
     state_in_out_t state_inout = {0};
@@ -412,6 +421,7 @@ void handle_event_reading_s2(bool new_status)
 {
     set_scene_status(new_status, scene_reading_s2_on, scene_reading_s2_off);
     status_room_new.reading_s2_status = new_status;
+    status_room_cur.reading_s2_status = new_status;  // Update current status immediately
     
     // Update the MQTT state for reading S2
     state_in_out_t state_inout = {0};
@@ -425,6 +435,7 @@ void handle_event_ceiling_s2(bool new_status)
 {
     set_scene_status(new_status, scene_ceiling_s2_on, scene_ceiling_s2_off);
     status_room_new.ceiling_light_s2_status = new_status;
+    status_room_cur.ceiling_light_s2_status = new_status;  // Update current status immediately
     
     // Update the MQTT state for ceiling S2
     state_in_out_t state_inout = {0};
@@ -440,6 +451,8 @@ void handle_event_night_s2(bool new_status)
     set_scene_status(new_status, scene_night_light_on, scene_night_light_off);
     status_room_new.night_light_s2_status = new_status;
     status_room_new.night_light_s3_status = new_status;
+    status_room_cur.night_light_s2_status = new_status;  // Update current status immediately
+    status_room_cur.night_light_s3_status = new_status;  // Update current status immediately
 
     // Update the MQTT state for night light S2-NIGHT
     state_in_out_t state_inout = {0};
@@ -460,6 +473,8 @@ void handle_event_night_s3(bool new_status)
     set_scene_status(new_status, scene_night_light_on, scene_night_light_off);
     status_room_new.night_light_s3_status = new_status;
     status_room_new.night_light_s2_status = new_status;
+    status_room_cur.night_light_s3_status = new_status;  // Update current status immediately
+    status_room_cur.night_light_s2_status = new_status;  // Update current status immediately
 
     // Update the MQTT state for night light S2-NIGHT
     state_in_out_t state_inout = {0};
@@ -481,6 +496,9 @@ void handle_event_master_m3(bool new_status)
     status_room_new.master_m3_status = new_status;
     status_room_new.master_m2_status = new_status;
     status_room_new.master_m1_status = new_status;
+    status_room_cur.master_m3_status = new_status;  // Update current status immediately
+    status_room_cur.master_m2_status = new_status;  // Update current status immediately
+    status_room_cur.master_m1_status = new_status;  // Update current status immediately
     
     state_in_out_t state_inout = {0};
     strcpy(state_inout.key, "S1_M1");
@@ -504,6 +522,7 @@ void handle_event_ceiling_s3(bool new_status)
 {
     set_scene_status(new_status, scene_ceiling_s3_on, scene_ceiling_s3_off);
     status_room_new.ceiling_light_s3_status = new_status;
+    status_room_cur.ceiling_light_s3_status = new_status;  // Update current status immediately
     
     // Update the MQTT state for ceiling S3
     state_in_out_t state_inout = {0};
@@ -517,6 +536,7 @@ void handle_event_reading_s3(bool new_status)
 {
     set_scene_status(new_status, scene_reading_s3_on, scene_reading_s3_off);
     status_room_new.reading_s3_status = new_status;
+    status_room_cur.reading_s3_status = new_status;  // Update current status immediately
     
     // Update the MQTT state for reading S3
     state_in_out_t state_inout = {0};
