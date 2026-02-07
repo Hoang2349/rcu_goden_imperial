@@ -300,14 +300,14 @@ void scene_itc_off()
 void scene_idu_on()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_IDU, true, data_send);
+    generate_relay_command(RELAY_IDU, false, data_send); // Thiết bị IDU dùng relay đảo chiều
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_IDU, true);  // Added push state for IDU on
 }
 void scene_idu_off()
 {
     char data_send[MAX_DATA_SIZE] = {0};
-    generate_relay_command(RELAY_IDU, false, data_send);
+    generate_relay_command(RELAY_IDU, true, data_send); // Thiết bị IDU dùng relay đảo chiều
     modbusWrite(data_send, MAX_DATA_SIZE);
     push_state_inout_mqtt(RELAY_IDU, false);  // Added push state for IDU off
 }
