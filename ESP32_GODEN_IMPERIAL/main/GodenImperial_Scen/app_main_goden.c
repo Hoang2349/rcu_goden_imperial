@@ -4,6 +4,7 @@
 #include "app_control_output.h"
 #include "app_goden_imperial_common.h"
 #include "app_handle_input.h"
+#include "app_state_persistence.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
@@ -12,7 +13,7 @@
 #include "app_nvs_config.h"
 
 #define DEFAULT_TIME_CROSSING 30 * 60  // 30 minutes
-#define DEFAULT_TIME_DOOR_AJAR 6      // 6 seconds
+#define DEFAULT_TIME_DOOR_AJAR 30      // 3 seconds
 
 // define version
 
@@ -46,15 +47,34 @@ void init_status_room()
 
 void syn_status_room(void *param)
 {
+    static uint32_t save_counter = 0;
+    const uint32_t SAVE_INTERVAL = 600; // Save every 600 iterations (about 1 minute with 100ms delay)
+    
     while (1)
     {
         if (flag_syn_status_room)
         {
             flag_syn_status_room = false;
             ESP_LOGI(__FUNCTION__, "Status room changed, updating...");
+            
+            // Save the current state to RAM when there's a change
+            esp_err_t ret = save_current_state_to_ram();
+            if (ret != ESP_OK) {
+                ESP_LOGE(__FUNCTION__, "Failed to save state to RAM: %s", esp_err_to_name(ret));
+            }
         }
 
-        vTaskDelay(pdMS_TO_TICKS(100));  // Delay 1 giây
+        // Periodically save the state even if there are no changes
+        save_counter++;
+        if (save_counter >= SAVE_INTERVAL) {
+            save_counter = 0;
+            esp_err_t ret = save_current_state_to_ram();
+            if (ret != ESP_OK) {
+                ESP_LOGE(__FUNCTION__, "Periodic save failed: %s", esp_err_to_name(ret));
+            }
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(100));  // Delay 100ms
     }
 }
 
@@ -205,16 +225,22 @@ void rule_room_hotel()
 
 void init_goden_imperial()
 {
-    // Initialize the status room
-    pms_room_status.status_room = ROOM_UNRENT;
-    pms_room_status.flag_checkin_first = true;
-    pms_room_status.flag_checkout_first = false;
-    pms_room_status.flag_setback = false;
-    pms_room_status.status_human = false;
+    // Initialize the state persistence system first
+    esp_err_t ret = init_state_persistence();
+    if (ret != ESP_OK) {
+        ESP_LOGW(__FUNCTION__, "State persistence initialization failed: %s", esp_err_to_name(ret));
+        // Initialize with default values if persistence fails
+        pms_room_status.status_room = ROOM_UNRENT;
+        pms_room_status.flag_checkin_first = true;
+        pms_room_status.flag_checkout_first = false;
+        pms_room_status.flag_setback = false;
+        pms_room_status.status_human = false;
 
-    // init sensor state
-    status_sensor.flag_door_sensor = DOOR_CLOSE;
-    status_sensor.flag_motion_sensor = INACTIVE;
+        // init sensor state
+        status_sensor.flag_door_sensor = DOOR_CLOSE;
+        status_sensor.flag_motion_sensor = INACTIVE;
+    }
+    
     init_goden_imperial_input();
     app_nvs_config_t config_data = {0};
     if (goden_inperial_read_config_data(&config_data) == ESP_OK)

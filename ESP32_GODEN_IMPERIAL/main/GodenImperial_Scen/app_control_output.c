@@ -24,6 +24,7 @@ static bool is_restoring_from_setback = false;
             status_room_cur.field = status_room_new.field;           \
             led_func(led_index,                                      \
                      status_room_cur.field); /* Update LED status */ \
+            flag_syn_status_room = true;                             \
         }                                                            \
     } while (0)
 
@@ -608,6 +609,9 @@ void handle_scene_unrented()
     free(json_string);
     free(json_string1);
     free(json_string2);
+    
+    // Trigger state synchronization
+    flag_syn_status_room = true;
 }
 
 void handle_scene_staff_mode()
@@ -620,6 +624,9 @@ void handle_scene_staff_mode()
     publish_data_mqtt(json_string);
     ESP_LOGI(__FUNCTION__, "Staff scene activated.");
     free(json_string);
+    
+    // Trigger state synchronization
+    flag_syn_status_room = true;
 }
 
 void handle_scene_welcome()
@@ -634,10 +641,13 @@ void handle_scene_welcome()
     publish_data_mqtt(json_string);
     ESP_LOGI(__FUNCTION__, "Welcome scene activated.");
     free(json_string);
+    
+    // Trigger state synchronization
+    flag_syn_status_room = true;
 }
 
 void handle_scene_standby()
-{    
+{
     scene_off_all();
     scene_itc_off();
     scene_idu_off();
@@ -646,6 +656,9 @@ void handle_scene_standby()
     publish_data_mqtt(json_string);
     ESP_LOGI(__FUNCTION__, "Standby scene activated.");
     free(json_string);
+    
+    // Trigger state synchronization
+    flag_syn_status_room = true;
 }
 
 void handle_scene_occupied()
@@ -662,6 +675,9 @@ void handle_scene_occupied()
     free(json_string1);
 
     ESP_LOGI(__FUNCTION__, "Occupied scene activated.");
+    
+    // Trigger state synchronization
+    flag_syn_status_room = true;
 }
 void scene_bell()
 {
@@ -699,6 +715,12 @@ void scene_mur(bool status)
         strcpy(state_inout.value, status_outdoor.status_dnd ? "true" : "false");
         push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
     }
+    
+    // Update the outdoor status
+    status_outdoor.status_mur = status;
+    
+    // Trigger state synchronization
+    flag_syn_status_room = true;
 }
 
 void scene_dnd(bool status)
@@ -723,6 +745,12 @@ void scene_dnd(bool status)
         strcpy(state_inout.value, status_outdoor.status_mur ? "true" : "false");
         push_state_inout(&state_inout, 100 / portTICK_PERIOD_MS);
     }
+    
+    // Update the outdoor status
+    status_outdoor.status_dnd = status;
+    
+    // Trigger state synchronization
+    flag_syn_status_room = true;
 }
 
 void push_state_inout_mqtt(int index, bool value)

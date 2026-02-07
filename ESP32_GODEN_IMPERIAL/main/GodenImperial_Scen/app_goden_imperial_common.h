@@ -2,6 +2,7 @@
 #define APP_GODEN_IMPERIAL_COMMON_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 
 
