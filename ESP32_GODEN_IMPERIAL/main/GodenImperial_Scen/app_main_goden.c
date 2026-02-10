@@ -116,8 +116,7 @@ void rule_room_hotel()
                 flag_staff_mode = ACTIVE;
                 status_sensor.flag_motion_sensor = false;
             }
-            status_sensor.flag_motion_sensor = false;
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(1000));
             continue;
         }
 
@@ -126,7 +125,7 @@ void rule_room_hotel()
         {
             ESP_LOGI(__FUNCTION__, "Waiting for door/motion sensor...: %ld",
                      time_crossing);
-
+//////////////////////////////////////////////Door open///////////////////////////////////////
             // Door opened trig - welcome scene or return from standby, sự kiện của mở
             if (status_sensor.new_status_door_sensor &&
                 status_sensor.flag_door_sensor == DOOR_OPEN)
@@ -144,7 +143,7 @@ void rule_room_hotel()
                 {
                     handle_scene_welcome();
                     pms_room_status.status_human = OCCUPIED;
-
+                    
                     char *json_string2 = create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
                     publish_data_mqtt(json_string2);
                     free(json_string2);
@@ -169,6 +168,13 @@ void rule_room_hotel()
                         // Bật cả ITC và IDU khi khôi phục trạng thái
                         scene_itc_on();
                         scene_idu_on();
+
+                        pms_room_status.status_human = OCCUPIED;
+
+                        char *json_string4 = create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
+                        publish_data_mqtt(json_string4);
+                        free(json_string4);
+
                         status_sensor.flag_motion_sensor = false;
                         ESP_LOGW(__FUNCTION__, ">>> Restored device states from saved state (door opened)");
                     }
@@ -183,15 +189,17 @@ void rule_room_hotel()
 
             // Door opened - just wait, cửa đang mở
             if (status_sensor.flag_door_sensor == DOOR_OPEN &&
-                time_crossing > 0 && pms_room_status.flag_checkin_first == false)
+                time_crossing > 0 && pms_room_status.flag_checkin_first == false &&  status_sensor.new_status_door_sensor == false)
             {
                 status_sensor.flag_motion_sensor = false;
-                vTaskDelay(pdMS_TO_TICKS(10));
+                vTaskDelay(pdMS_TO_TICKS(2000));
+                status_sensor.flag_motion_sensor = false;
+                vTaskDelay(pdMS_TO_TICKS(2000));
                 ESP_LOGI(__FUNCTION__, "Door opened--------------");
                 continue;
             }
 
-
+//////////////////////////////////////////////Door close///////////////////////////////////////
             // Door closed - prepare to check motion, sự kiện cửa đóng
             if (status_sensor.new_status_door_sensor &&
                 status_sensor.flag_door_sensor == DOOR_CLOSE)

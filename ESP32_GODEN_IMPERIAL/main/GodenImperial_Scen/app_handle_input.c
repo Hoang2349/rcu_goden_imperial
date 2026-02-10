@@ -15,6 +15,9 @@ QueueHandle_t queueInputStm32;
 static TickType_t last_door_event_time = 0;
 static const TickType_t DOOR_LOCKOUT_TIME = pdMS_TO_TICKS(500); // 500ms lockout time
 
+#define TASK_PERIOD_MS        100
+#define DOOR_AJAR_TIMEOUT_S   300
+#define DOOR_AJAR_COUNT_MAX  (DOOR_AJAR_TIMEOUT_S * 1000 / TASK_PERIOD_MS)
 
 /**
  * @brief Ham khoi tao queue input tu STM32
@@ -108,26 +111,29 @@ void hanlde_mode_outdoor(void *param)
             vTaskDelay(pdMS_TO_TICKS(TIMEOUT_AFTER_BELL_ACTIVE));
         }
         // dooor ajar
-        if (status_sensor.flag_door_sensor == DOOR_OPEN)
+       if (status_sensor.flag_door_sensor == DOOR_OPEN)
         {
-            //if (count > (time_door_ajar * 10) && temp1 == false)
-            if (count > (300 * 10) && temp1 == false)
+            count++;
+
+            if (count >= DOOR_AJAR_COUNT_MAX && !temp1)
             {
-                char *json_string = "{\"DOOR_AJAR\": \"true\"}";
+                char *json_string = create_json_dynamic("DOOR_AJAR", "true", TYPE_STRING);
                 publish_data_mqtt(json_string);
                 free(json_string);
                 temp1 = true;
             }
-            count++;
-            continue;
         }
-        if (status_sensor.flag_door_sensor == DOOR_CLOSE && temp1 == true)
+        else
         {
+            if (temp1)
+            {
+                char *json_string = create_json_dynamic("DOOR_AJAR", "false", TYPE_STRING);
+                publish_data_mqtt(json_string);
+                free(json_string);
+            }
+
             count = 0;
             temp1 = false;
-            char *json_string = "{\"DOOR_AJAR\": \"false\"}";
-            publish_data_mqtt(json_string);
-            free(json_string);
         }
     }
 }

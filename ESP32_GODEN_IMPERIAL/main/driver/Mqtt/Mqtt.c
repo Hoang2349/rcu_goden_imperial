@@ -214,11 +214,6 @@ void appMqttInit()
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqttEventHandler,
                                    client);
     esp_mqtt_client_start(client);
-
-    // initialize MQTT with default door ajar state
-    char *json_string = "{\"DOOR_AJAR\": \"false\"}";
-    publish_data_mqtt(json_string);
-    free(json_string);
 }
 
 /// @brief Publish data to mqtt server

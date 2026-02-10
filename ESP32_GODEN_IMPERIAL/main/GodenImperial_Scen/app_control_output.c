@@ -741,7 +741,7 @@ void scene_bell()
     modbusWrite(data_send, MAX_DATA_SIZE);
     generate_led_command(LED_BELL, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
-    vTaskDelay(pdMS_TO_TICKS(TIME_ACTIVE_BELL));
+    vTaskDelay(pdMS_TO_TICKS(10*1000)); //den C10 sang 10 giay
     scene_C10_off();
 }
 
