@@ -343,7 +343,6 @@ void handle_data_mqtt_set(sMqttPkg_t *mqttPkg)
             if (pms->valueint == ROOM_RENTED)
             {
                 pms_room_status.status_room = ROOM_RENTED;
-                pms_room_status.flag_checkin_first = true;
                 char *json_string =
                     create_json_dynamic("ROOM_STATUS", "RENTED", TYPE_STRING);
                 // publish_data_mqtt(json_string);
