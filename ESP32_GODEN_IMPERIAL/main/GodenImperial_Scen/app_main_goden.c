@@ -127,7 +127,7 @@ void rule_room_hotel()
             ESP_LOGI(__FUNCTION__, "Waiting for door/motion sensor...: %ld",
                      time_crossing);
 
-            // Door opened trig - welcome scene or return from standby
+            // Door opened trig - welcome scene or return from standby, sự kiện của mở
             if (status_sensor.new_status_door_sensor &&
                 status_sensor.flag_door_sensor == DOOR_OPEN)
             {
@@ -181,7 +181,7 @@ void rule_room_hotel()
                 continue;
             }
 
-            // Door opened - just wait
+            // Door opened - just wait, cửa đang mở
             if (status_sensor.flag_door_sensor == DOOR_OPEN &&
                 time_crossing > 0 && pms_room_status.flag_checkin_first == false)
             {
@@ -192,7 +192,7 @@ void rule_room_hotel()
             }
 
 
-            // Door closed - prepare to check motion
+            // Door closed - prepare to check motion, sự kiện cửa đóng
             if (status_sensor.new_status_door_sensor &&
                 status_sensor.flag_door_sensor == DOOR_CLOSE)
             {
@@ -204,7 +204,7 @@ void rule_room_hotel()
                 continue;
             }
            
-            // Chương trinhg khi cửa đóng và kiểm tra chuyển động
+            // Chương trinhg khi cửa đang đóng và kiểm tra chuyển động
             if (status_sensor.flag_door_sensor == DOOR_CLOSE &&
                 time_crossing > 0 && pms_room_status.flag_checkin_first == false)
             {
