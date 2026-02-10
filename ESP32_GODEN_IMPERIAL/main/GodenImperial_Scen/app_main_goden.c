@@ -131,9 +131,15 @@ void rule_room_hotel()
             if (status_sensor.new_status_door_sensor &&
                 status_sensor.flag_door_sensor == DOOR_OPEN)
             {
+                
                 time_crossing = time_crossing_set;
                 status_sensor.new_status_door_sensor = false;
                 status_sensor.flag_motion_sensor = false;
+                 // initialize MQTT with default door ajar state
+                char *json_string3 = create_json_dynamic("DOOR_AJAR", "false", TYPE_STRING);
+                publish_data_mqtt(json_string3);
+                free(json_string3);
+
                 if (pms_room_status.flag_checkin_first)
                 {
                     handle_scene_welcome();
@@ -238,13 +244,13 @@ void rule_room_hotel()
                     check_mode = false;
                     time_crossing = time_crossing_set;
 
-                     char *json_string = create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
-                    publish_data_mqtt(json_string);
-                    char *json_string1 =
-                        create_json_dynamic("SET_BACK_ACTIVE", "false", TYPE_STRING);
-                    publish_data_mqtt(json_string1);
-                    free(json_string);
-                    free(json_string1);
+                    //char *json_string = create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
+                    //publish_data_mqtt(json_string);
+                    //char *json_string1 =
+                    //    create_json_dynamic("SET_BACK_ACTIVE", "false", TYPE_STRING);
+                    //publish_data_mqtt(json_string1);
+                    //free(json_string);
+                    //free(json_string1);
                     save_occ_initial_state();
                     // Cập nhật trạng thái đồng bộ
                     flag_syn_status_room = true;
