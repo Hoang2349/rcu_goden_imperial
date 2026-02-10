@@ -637,7 +637,7 @@ void handle_scene_unrented()
     ESP_LOGI(__FUNCTION__, "Unrented scene activated.");
 
     char *json_string2 =
-        create_json_dynamic("SET_BACK_ACTIVE", "false", TYPE_STRING);
+        create_json_dynamic("SET_BACK_ACTIVE", "true", TYPE_STRING);
     publish_data_mqtt(json_string2);
 
     // initialize MQTT with default door ajar state
