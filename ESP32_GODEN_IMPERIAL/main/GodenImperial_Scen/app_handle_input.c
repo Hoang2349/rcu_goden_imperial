@@ -110,10 +110,12 @@ void hanlde_mode_outdoor(void *param)
         // dooor ajar
         if (status_sensor.flag_door_sensor == DOOR_OPEN)
         {
-            if (count > (time_door_ajar * 10) && temp1 == false)
+            //if (count > (time_door_ajar * 10) && temp1 == false)
+            if (count > (300 * 10) && temp1 == false)
             {
                 char *json_string = "{\"DOOR_AJAR\": \"true\"}";
                 publish_data_mqtt(json_string);
+                free(json_string);
                 temp1 = true;
             }
             count++;
@@ -125,6 +127,7 @@ void hanlde_mode_outdoor(void *param)
             temp1 = false;
             char *json_string = "{\"DOOR_AJAR\": \"false\"}";
             publish_data_mqtt(json_string);
+            free(json_string);
         }
     }
 }

@@ -259,6 +259,23 @@ void scene_minibar_off()
     push_state_inout_mqtt(RELAY_C9, false);
 }
 
+
+void scene_C10_on()
+{
+    char data_send[MAX_DATA_SIZE] = {0};
+    generate_relay_command(RELAY_C10, true, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C10, true);
+}
+
+void scene_C10_off()
+{
+    char data_send[MAX_DATA_SIZE] = {0};
+    generate_relay_command(RELAY_C10, false, data_send);
+    modbusWrite(data_send, MAX_DATA_SIZE);
+    push_state_inout_mqtt(RELAY_C10, false);
+}
+
 void scene_bell_on()
 {
     char data_send[MAX_DATA_SIZE] = {0};
@@ -623,6 +640,12 @@ void handle_scene_unrented()
         create_json_dynamic("SET_BACK_ACTIVE", "false", TYPE_STRING);
     publish_data_mqtt(json_string2);
 
+    // initialize MQTT with default door ajar state
+    char *json_string3 = create_json_dynamic("DOOR_AJAR", "false", TYPE_STRING);
+    publish_data_mqtt(json_string3);
+    free(json_string3);
+
+    pms_room_status.status_human = UNOCCUPIED;
     // Đặt lại flag_checkin_first để chuẩn bị cho lần check-in tiếp theo
     pms_room_status.flag_checkin_first = true;
 
@@ -656,12 +679,12 @@ void handle_scene_welcome()
     scene_idu_on();
     scene_dnd(false);
     scene_mur(false);
-    char *json_string =
-        create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
-    publish_data_mqtt(json_string);
     ESP_LOGI(__FUNCTION__, "Welcome scene activated.");
-    free(json_string);
-    
+
+     // initialize MQTT with default door ajar state
+    char *json_string3 = create_json_dynamic("DOOR_AJAR", "false", TYPE_STRING);
+    publish_data_mqtt(json_string3);
+    free(json_string3);
     // Trigger state synchronization
     flag_syn_status_room = true;
 }
@@ -676,6 +699,11 @@ void handle_scene_standby()
     publish_data_mqtt(json_string);
     ESP_LOGI(__FUNCTION__, "Standby scene activated.");
     free(json_string);
+
+     // initialize MQTT with default door ajar state
+    char *json_string3 = create_json_dynamic("DOOR_AJAR", "false", TYPE_STRING);
+    publish_data_mqtt(json_string3);
+    free(json_string3);
     
     // Trigger state synchronization
     flag_syn_status_room = true;
@@ -702,6 +730,7 @@ void handle_scene_occupied()
 void scene_bell()
 {
     char data_send[MAX_DATA_SIZE] = {0};
+    scene_C10_on();
     generate_relay_command(RELAY_BELL, true, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
     generate_led_command(LED_BELL, true, data_send);
@@ -711,6 +740,8 @@ void scene_bell()
     modbusWrite(data_send, MAX_DATA_SIZE);
     generate_led_command(LED_BELL, false, data_send);
     modbusWrite(data_send, MAX_DATA_SIZE);
+    vTaskDelay(pdMS_TO_TICKS(TIME_ACTIVE_BELL));
+    scene_C10_off();
 }
 
 void scene_mur(bool status)

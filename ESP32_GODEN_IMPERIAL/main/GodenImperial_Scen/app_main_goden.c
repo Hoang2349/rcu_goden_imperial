@@ -15,7 +15,7 @@
 #include "app_nvs_config.h"
 
 #define DEFAULT_TIME_CROSSING 30 * 60  // 30 minutes
-#define DEFAULT_TIME_DOOR_AJAR 30      // 3 seconds
+#define DEFAULT_TIME_DOOR_AJAR 300      // 30 seconds
 
 // define version
 
@@ -90,7 +90,6 @@ void syn_status_room(void *param)
     }
 }
 
-bool temp = false;
 bool check_mode = false;
 void rule_room_hotel()
 {
@@ -105,6 +104,7 @@ void rule_room_hotel()
                 vTaskDelay(pdMS_TO_TICKS(30000));
                 handle_scene_unrented();
                 flag_staff_mode = INACTIVE;
+                status_sensor.flag_motion_sensor = false;
                 continue;
             }
 
@@ -114,8 +114,9 @@ void rule_room_hotel()
             {
                 handle_scene_staff_mode();
                 flag_staff_mode = ACTIVE;
+                status_sensor.flag_motion_sensor = false;
             }
-
+            status_sensor.flag_motion_sensor = false;
             vTaskDelay(pdMS_TO_TICKS(100));
             continue;
         }
@@ -126,19 +127,24 @@ void rule_room_hotel()
             ESP_LOGI(__FUNCTION__, "Waiting for door/motion sensor...: %ld",
                      time_crossing);
 
-            // Door opened - welcome scene
+            // Door opened trig - welcome scene or return from standby
             if (status_sensor.new_status_door_sensor &&
                 status_sensor.flag_door_sensor == DOOR_OPEN)
             {
                 time_crossing = time_crossing_set;
                 status_sensor.new_status_door_sensor = false;
-
+                status_sensor.flag_motion_sensor = false;
                 if (pms_room_status.flag_checkin_first)
                 {
                     handle_scene_welcome();
                     pms_room_status.status_human = OCCUPIED;
+
+                    char *json_string2 = create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
+                    publish_data_mqtt(json_string2);
+                    free(json_string2);
+
                     pms_room_status.flag_checkin_first = false;
-                    temp = true;
+                    status_sensor.flag_motion_sensor = false;
                     char *json_string = create_json_dynamic(
                         "WELCOME_STATUS", "true", TYPE_STRING);
                     publish_data_mqtt(json_string);
@@ -149,12 +155,36 @@ void rule_room_hotel()
                 else
                 {
                     // Nếu không phải lần đầu tiên và đang ở trạng thái standby (UNOCCUPIED)
-                    // Không áp dụng lại trạng thái setback khi cửa mở, chỉ áp dụng khi có chuyển động
-                    // Trạng thái setback sẽ được áp dụng khi phát hiện chuyển động và chuyển sang trạng thái OCCUPIED
-                    ESP_LOGI(__FUNCTION__, "Door opened but room is in standby (UNOCCUPIED), waiting for motion to apply setback");
+                    // Thì khôi phục trạng thái thiết bị khi mở cửa
+                    if (pms_room_status.status_human == UNOCCUPIED)
+                    {
+                      
+                        restore_occ_initial_state();
+                        // Bật cả ITC và IDU khi khôi phục trạng thái
+                        scene_itc_on();
+                        scene_idu_on();
+                        status_sensor.flag_motion_sensor = false;
+                        ESP_LOGW(__FUNCTION__, ">>> Restored device states from saved state (door opened)");
+                    }
+                    else
+                    {
+                        status_sensor.flag_motion_sensor = false;
+                        ESP_LOGI(__FUNCTION__, "Door opened but room is not in standby, continuing normally");
+                    }
                 }
                 continue;
             }
+
+            // Door opened - just wait
+            if (status_sensor.flag_door_sensor == DOOR_OPEN &&
+                time_crossing > 0 && pms_room_status.flag_checkin_first == false)
+            {
+                status_sensor.flag_motion_sensor = false;
+                vTaskDelay(pdMS_TO_TICKS(10));
+                ESP_LOGI(__FUNCTION__, "Door opened--------------");
+                continue;
+            }
+
 
             // Door closed - prepare to check motion
             if (status_sensor.new_status_door_sensor &&
@@ -162,96 +192,83 @@ void rule_room_hotel()
             {
                 check_mode = true;
                 status_sensor.new_status_door_sensor = false;
-                temp = false;
+                status_sensor.flag_motion_sensor = false;
                 time_crossing = time_crossing_set;
                 ESP_LOGI(__FUNCTION__, "Door closed, wait for motion");
                 continue;
             }
-
-            // Handle timeout if no motion detected after welcome
-            if (temp)
-            {
-                if (time_crossing > 0)
-                {
-                    time_crossing--;
-                    vTaskDelay(pdMS_TO_TICKS(1000));
-                    continue;
-                }
-                temp = false;
-                time_crossing = time_crossing_set;
-                
-                // Lưu trạng thái hiện tại trước khi chuyển sang standby
-                if (pms_room_status.status_human == OCCUPIED) {
-                    save_occ_initial_state();
-                }
-                
-                handle_scene_standby();
-            }
-
-            // Check for occupied status
+           
+            // Chương trinhg khi cửa đóng và kiểm tra chuyển động
             if (status_sensor.flag_door_sensor == DOOR_CLOSE &&
-                time_crossing > 0)
+                time_crossing > 0 && pms_room_status.flag_checkin_first == false)
             {
+                // neu có chuyển động trong thời gian chờ mà chưa UNOCCUPIED
                 if (status_sensor.flag_motion_sensor &&
                     pms_room_status.status_human == UNOCCUPIED)
+                {
+                   
+                    // Bật cả ITC và IDU khi khôi phục trạng thái
+                    restore_occ_initial_state();
+                    scene_itc_on();
+                    scene_idu_on();
+                    status_sensor.flag_motion_sensor = false;
+                    ESP_LOGW(__FUNCTION__, ">>> Restored device states from saved state (door opened)");
+                   
+
+                    pms_room_status.status_human = OCCUPIED;
+                    status_sensor.flag_motion_sensor = false;
+                    check_mode = false;
+                    time_crossing = time_crossing_set;
+
+                    char *json_string = create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
+                    publish_data_mqtt(json_string);
+                    char *json_string1 =
+                        create_json_dynamic("SET_BACK_ACTIVE", "false", TYPE_STRING);
+                    publish_data_mqtt(json_string1);
+                    free(json_string);
+                    free(json_string1);
+                    continue;
+                }
+                // neu có chuyển động trong thời gian chờ mà đang OCCUPIED
+                if (status_sensor.flag_motion_sensor &&
+                    pms_room_status.status_human == OCCUPIED)
                 {
                     pms_room_status.status_human = OCCUPIED;
                     status_sensor.flag_motion_sensor = false;
                     check_mode = false;
                     time_crossing = time_crossing_set;
-                    
-                    // Nếu đã có trạng thái OCC được lưu, khôi phục lại
-                    if (is_occ_state_saved()) {
-                        restore_occ_initial_state();
-                        // Vẫn cần thực hiện các hành động cần thiết như trong handle_scene_occupied()
-                        scene_itc_on();
-                        scene_idu_on();
-                        char *json_string = create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
-                        publish_data_mqtt(json_string);
-                        char *json_string1 =
-                            create_json_dynamic("SET_BACK_ACTIVE", "false", TYPE_STRING);
-                        publish_data_mqtt(json_string1);
-                        free(json_string);
-                        free(json_string1);
-                        
-                        // Cập nhật trạng thái đồng bộ
-                        flag_syn_status_room = true;
-                        
-                        ESP_LOGW(__FUNCTION__, ">>> OCCUPIED - Restored from saved state");
-                    } else {
-                        handle_scene_occupied();
-                        ESP_LOGW(__FUNCTION__, ">>> OCCUPIED - Fresh occupied state");
-                    }
+
+                     char *json_string = create_json_dynamic("ROOM_STATUS", "OCC", TYPE_STRING);
+                    publish_data_mqtt(json_string);
+                    char *json_string1 =
+                        create_json_dynamic("SET_BACK_ACTIVE", "false", TYPE_STRING);
+                    publish_data_mqtt(json_string1);
+                    free(json_string);
+                    free(json_string1);
+                    save_occ_initial_state();
+                    // Cập nhật trạng thái đồng bộ
+                    flag_syn_status_room = true;
                     continue;
                 }
-
-                if (status_sensor.flag_motion_sensor &&
-                    pms_room_status.status_human == OCCUPIED)
+                // neu không có chuyển động trong thời gian chờ
+                if (check_mode)
                 {
-                    status_sensor.flag_motion_sensor = false;
-                    check_mode = false;
-                    time_crossing = time_crossing_set;
-                    
-                    // Nếu trạng thái OCC đã được lưu và có chuyển động, 
-                    // có thể muốn cập nhật lại trạng thái nếu cần
-                    // (tùy chọn, có thể bỏ qua nếu không cần thiết)
-                }
-
-                if (pms_room_status.status_human == OCCUPIED && check_mode)
-                {
+                    ESP_LOGI(__FUNCTION__, "Handle timeout in rent");
                     time_crossing--;
                 }
-
+                
                 vTaskDelay(pdMS_TO_TICKS(1000));
                 continue;
             }
-
+            
             // Handle unoccupied state
             if (!time_crossing)
             {
-                // Lưu trạng thái hiện tại nếu đang ở trạng thái OCCUPIED trước khi chuyển sang standby
-                if (pms_room_status.status_human == OCCUPIED) {
+
+                if (pms_room_status.status_human == OCCUPIED)
+                {
                     save_occ_initial_state();
+                    flag_syn_status_room = true;
                 }
                 
                 pms_room_status.status_human = UNOCCUPIED;
@@ -283,7 +300,6 @@ void init_goden_imperial()
         pms_room_status.flag_checkout_first = false;
         pms_room_status.flag_setback = false;
         pms_room_status.status_human = false;
-
         // init sensor state
         status_sensor.flag_door_sensor = DOOR_CLOSE;
         status_sensor.flag_motion_sensor = INACTIVE;
@@ -297,7 +313,8 @@ void init_goden_imperial()
     if (goden_inperial_read_config_data(&config_data) == ESP_OK)
     {
         time_crossing_set = config_data.time_crossing;
-        time_door_ajar = config_data.time_door_ajar;
+        //time_door_ajar = config_data.time_door_ajar;
+        time_door_ajar = DEFAULT_TIME_DOOR_AJAR;
         ESP_LOGI(__FUNCTION__, "Loaded config data from NVS: time_crossing=%ld, time_door_ajar=%f",
                  time_crossing_set, time_door_ajar);
     }
