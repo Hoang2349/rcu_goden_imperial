@@ -667,6 +667,7 @@ void handle_scene_staff_mode()
     publish_data_mqtt(json_string);
     ESP_LOGI(__FUNCTION__, "Staff scene activated.");
     free(json_string);
+    pms_room_status.flag_checkin_first = true;
     
     // Trigger state synchronization
     flag_syn_status_room = true;
