@@ -16,7 +16,7 @@ static TickType_t last_door_event_time = 0;
 static const TickType_t DOOR_LOCKOUT_TIME = pdMS_TO_TICKS(500); // 500ms lockout time
 
 #define TASK_PERIOD_MS        100
-#define DOOR_AJAR_TIMEOUT_S   300
+#define DOOR_AJAR_TIMEOUT_S   30
 #define DOOR_AJAR_COUNT_MAX  (DOOR_AJAR_TIMEOUT_S * 1000 / TASK_PERIOD_MS)
 
 /**
